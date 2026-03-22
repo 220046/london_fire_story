@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Fire Service That Barely Fights Fires</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://api.mapbox.com/mapbox-gl-js/v3.17.0/mapbox-gl.css" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+  <div id="progress-bar"></div>
+
+  <nav id="nav" class="nav-hidden">
+    <div class="nav-inner">
+      <div class="nav-brand">LFB Story</div>
+      <ul class="nav-links">
+        <li data-target="ch1" class="nav-link">The Shift</li>
+        <li data-target="ch2" class="nav-link">Three Paths</li>
+        <li data-target="ch3" class="nav-link">Who Burns</li>
+        <li data-target="ch4" class="nav-link">Signals</li>
+        <li data-target="ch5" class="nav-link">Conclusion</li>
+      </ul>
+      <div class="nav-home" data-target="hero">Home</div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section id="hero" class="full-section">
+    <canvas id="ember-canvas"></canvas>
+    <div class="hero-content">
+      <p class="hero-pre">CASA0029 Urban Data Visualisation</p>
+      <h1 class="hero-title" id="hero-title">
+        <span class="title-line" id="title-line1"></span>
+        <span class="title-line" id="title-line2"></span>
+      </h1>
+      <p class="hero-tagline" id="hero-tagline">How 1.9 million emergency calls reveal a city in transformation</p>
+      <div class="scroll-cue" id="scroll-cue">
+        <span>Scroll to begin</span>
+        <div class="scroll-arrow"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BRIDGE 1 -->
+  <div class="bridge">
+    <p class="bridge-text">In 2009, <strong>1 in 5</strong> calls was a real fire.<br>By 2025, it was <strong>fewer than 1 in 7</strong>.<br><span class="bridge-q">So what changed?</span></p>
+  </div>
+
+  <!-- CH1: The Identity Shift -->
+  <section id="ch1" class="chapter">
+    <div class="chapter-header"><span class="ch-num">01</span><h2>The Identity Shift</h2></div>
+    <div class="ch1-body">
+      <div class="kpi-row" id="kpi-ch1">
+        <div class="kpi-card"><span class="kpi-val" data-to="1952560" data-suf="">0</span><span class="kpi-lbl">Total Calls Analysed</span></div>
+        <div class="kpi-card"><span class="kpi-val" data-to="14" data-suf="%">0</span><span class="kpi-lbl">Are Fires (2025)</span></div>
+        <div class="kpi-card"><span class="kpi-val" data-to="41" data-suf="%">0</span><span class="kpi-lbl">Special Service (2025)</span></div>
+        <div class="kpi-card"><span class="kpi-val" data-to="17" data-suf=" yrs">0</span><span class="kpi-lbl">Of Data (2009–2025)</span></div>
+      </div>
+      <div class="chart-box chart-wide"><canvas id="chart-yearly"></canvas></div>
+      <p class="ch-insight">The total call volume hasn't grown — but the <em>composition</em> has shifted dramatically. Fire is fading. Something else is rising.</p>
+    </div>
+  </section>
+
+  <!-- BRIDGE 2 -->
+  <div class="bridge">
+    <p class="bridge-text">If it's not fires, what <strong>are</strong> the 100,000 annual calls?</p>
+  </div>
+
+  <!-- CH2: Three Trajectories -->
+  <section id="ch2" class="chapter">
+    <div class="chapter-header"><span class="ch-num">02</span><h2>Three Trajectories</h2></div>
+    <div class="ch2-body">
+      <div class="traj-tabs">
+        <button class="traj-tab active" data-t="fa"><span class="tt-dot dot-gray"></span><span class="tt-name">False Alarm</span><span class="tt-stat">951K calls</span></button>
+        <button class="traj-tab" data-t="fire"><span class="tt-dot dot-fire"></span><span class="tt-name">Fire</span><span class="tt-stat">-50% decline</span></button>
+        <button class="traj-tab" data-t="ss"><span class="tt-dot dot-teal"></span><span class="tt-name">Special Service</span><span class="tt-stat">31% → 41%</span></button>
+      </div>
+      <div class="traj-panels">
+        <div class="traj-panel active" id="tp-fa">
+          <div class="tp-text"><h3>The Wasted Effort</h3><p><strong class="big-n">951,111</strong> false alarms in 17 years. <strong>75.7%</strong> were automatic fire alarms going off by mistake. Nearly <em>1 in 2</em> calls is a wasted trip.</p></div>
+          <div class="tp-chart"><canvas id="chart-fa"></canvas></div>
+        </div>
+        <div class="traj-panel" id="tp-fire">
+          <div class="tp-text"><h3>The Decline</h3><p>Fire incidents dropped <strong class="big-n">50%</strong> since 2009. Building regulations and smoke alarms are working. Dwelling fires: 27.8%, outdoor: 26.3%.</p></div>
+          <div class="tp-chart"><canvas id="chart-fire-prop"></canvas></div>
+        </div>
+        <div class="traj-panel" id="tp-ss">
+          <div class="tp-text"><h3>The Rise</h3><p>Special service share grew from 31% to <strong class="big-n">41%</strong>. Forced entries <em>+86%</em>. Agency assists <em>+433%</em>. The fire brigade is becoming a multi-purpose emergency service.</p></div>
+          <div class="tp-chart"><svg id="slope-chart"></svg></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BRIDGE 3 -->
+  <div class="bridge">
+    <p class="bridge-text">Fires are falling. But <strong>who</strong> is still burning?</p>
+  </div>
+
+  <!-- CH3: Who Still Burns? -->
+  <section id="ch3" class="chapter">
+    <div class="chapter-header"><span class="ch-num">03</span><h2>Who Still Burns?</h2></div>
+    <div class="ch3-body">
+      <div class="ch3-row">
+        <div class="ch3-text"><h3>The Seasonal Surprise</h3><p>Most people assume winter is fire season. <strong>They're wrong.</strong> July has the most fires — outdoor fires surge <em>3.8×</em> in summer while dwelling fires stay flat.</p></div>
+        <div class="chart-box"><canvas id="chart-monthly"></canvas></div>
+      </div>
+      <div class="ch3-maps">
+        <h3 class="maps-h">Fire KDE Density vs Response Time</h3>
+        <p class="maps-sub">Left: kernel density estimation mapped to boroughs | Right: average first-pump response time</p>
+        <div class="dual-maps">
+          <div class="map-half"><div class="map-lbl"><span class="lbl-dot dot-fire"></span> Fire KDE Density (Gaussian kernel)</div><div id="map-fire" class="map-box"></div></div>
+          <div class="map-half"><div class="map-lbl"><span class="lbl-dot dot-teal"></span> Avg Response Time (seconds)</div><div id="map-response" class="map-box"></div></div>
+        </div>
+        <div id="hover-info" class="hover-info"><span class="hover-hint">Hover over a borough on either map to compare</span></div>
+      </div>
+      <div class="ch3-row ch3-evidence">
+        <div class="chart-box chart-sm"><canvas id="chart-quartile"></canvas></div>
+        <div class="ch3-text"><h3>The Proof</h3><p>The poorest quarter of wards has <strong class="big-n">64%</strong> higher fire rates than the richest.</p><p class="stat-note">Pearson r = 0.25, p &lt; 0.001 — statistically significant across 501 wards</p><p class="stat-cite">Data: IMD 2019 (MHCLG) × LFB Incidents 2018-2023</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BRIDGE 4 -->
+  <div class="bridge">
+    <p class="bridge-text">The new emergencies aren't about flames.<br>They're about <strong>a changing city</strong>.</p>
+  </div>
+
+  <!-- CH4: Signals of a Changing City -->
+  <section id="ch4" class="chapter">
+    <div class="chapter-header"><span class="ch-num">04</span><h2>Signals of a Changing City</h2></div>
+
+    <div class="scrolly" id="scrolly-ch4">
+      <div class="scrolly-graphic">
+        <div id="map-signals" class="scrolly-map"></div>
+        <div id="sig-overlay" class="sig-overlay"></div>
+      </div>
+      <div class="scrolly-steps">
+        <div class="step" data-step="intro"><div class="step-card"><h3>Three Signals</h3><p>Each special service sub-type maps to a specific urban pressure. Scroll to explore them across London.</p></div></div>
+        <div class="step" data-step="entry"><div class="step-card sc-fire"><h3>Forced Entry <span class="badge">+86%</span></h3><p><strong>144,144</strong> in 17 years. Stable until 2020, then surged post-COVID — ageing alone, locked out, welfare checks.</p><canvas id="spark-entry" height="50"></canvas></div></div>
+        <div class="step" data-step="flood"><div class="step-card sc-teal"><h3>Flooding <span class="badge">+10.6%</span></h3><p><strong>124,440</strong> incidents. Modest growth but extreme volatility — driven by single weather events along the Thames.</p><canvas id="spark-flood" height="50"></canvas></div></div>
+        <div class="step" data-step="assist"><div class="step-card sc-yellow"><h3>Agency Assist <span class="badge">+433%</span></h3><p>From 1,019 to <strong>5,427</strong>. Explosive growth — fire services supporting police, NHS, councils.</p><canvas id="spark-assist" height="50"></canvas></div></div>
+        <div class="step" data-step="divide"><div class="step-card sc-contrast"><h3>The Inner-Outer Divide <span class="badge">+28.6% outer</span></h3><p>Inner London SS growth: <strong>+3.5%</strong>. Outer London: <strong>+28.6%</strong>.</p><p>New demand is shifting outward — precisely where response times are already <strong>20% slower</strong>.</p><canvas id="spark-inout" height="55"></canvas></div></div>
+      </div>
+    </div>
+
+    <div class="ch4-scatter">
+      <h3>The Response Gap</h3>
+      <p class="scatter-sub">Boroughs with fastest-growing demand often wait the longest</p>
+      <div id="scatter-wrap"><svg id="scatter-plot"></svg></div>
+    </div>
+  </section>
+
+  <!-- CH5: Reading the City -->
+  <section id="ch5" class="chapter ch5-section">
+    <div class="ch5-body">
+      <div class="chapter-header"><span class="ch-num">05</span><h2>Reading the City</h2></div>
+      <p class="conclusion-lead">London Fire Brigade answers over <strong>100,000</strong> calls a year.<br>Fewer than 1 in 10 are actual fires.</p>
+      <p class="conclusion-text">The rest — floods, forced entries, agency assists — are signals of a city ageing, warming, and stretching its safety nets.</p>
+      <p class="conclusion-text">Urban Analytics lets us read these signals and ask: <em>is the system resilient enough?</em></p>
+      <div class="kpi-row kpi-final" id="kpi-ch5">
+        <div class="kpi-card"><span class="kpi-val" data-to="50" data-suf="%" data-pre="-">0</span><span class="kpi-lbl">Fire decline</span></div>
+        <div class="kpi-card"><span class="kpi-val" data-to="86" data-suf="%" data-pre="+">0</span><span class="kpi-lbl">Forced entries</span></div>
+        <div class="kpi-card"><span class="kpi-val" data-to="433" data-suf="%" data-pre="+">0</span><span class="kpi-lbl">Agency assists</span></div>
+        <div class="kpi-card"><span class="kpi-val" data-to="64" data-suf="%" data-pre="+">0</span><span class="kpi-lbl">Fire gap rich vs poor</span></div>
+      </div>
+      <div class="methodology">
+        <h4>Methodology & Data</h4>
+        <p>1,952,560 LFB incident records (2009–2025) from <a href="https://data.london.gov.uk/" target="_blank">London Datastore</a> (OGL v2). Ward-level IMD 2019 from MHCLG. Statistical correlations via Pearson and Spearman tests.</p>
+        <h4>References</h4>
+        <ul>
+          <li>Meerow et al. (2016) Defining urban resilience. <em>Landscape &amp; Urban Planning</em>, 147.</li>
+          <li>Jennings (2013) Social characteristics as determinants of residential fire risk. <em>Fire Safety J.</em>, 62.</li>
+          <li>Singleton et al. (2018) <em>Urban Analytics</em>. SAGE.</li>
+          <li>Taylor (2016) London's burning: Impact of 2014 station closures.</li>
+          <li>London Fire Brigade Annual Reports 2009–2025.</li>
+        </ul>
+      </div>
+      <div class="credits"><p>CASA0029 Urban Data Visualisation · UCL 2025-26</p></div>
+    </div>
+  </section>
+
+  <script src="https://api.mapbox.com/mapbox-gl-js/v3.17.0/mapbox-gl.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0"></script>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+  <script src="https://unpkg.com/scrollama@3.2.0/build/scrollama.min.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
