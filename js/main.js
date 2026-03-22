@@ -584,9 +584,9 @@ async function initDualMaps() {
 }
 
 function updateHoverInfo(p) {
-  const kde = p.fireKDE ? p.fireKDE.toFixed(1) : '—';
+  const kde = p.fireKDE ? p.fireKDE.toFixed(1) : ' -';
   document.getElementById('hover-info').innerHTML =
-    `<strong>${p.name}</strong> — KDE density: <em>${kde}</em> · Response: <em>${p.avgResponseSec}s</em> · Total fires: ${Number(p.totalFire).toLocaleString()} · Pop: ${Number(p.population).toLocaleString()}`;
+    `<strong>${p.name}</strong>  - KDE density: <em>${kde}</em> · Response: <em>${p.avgResponseSec}s</em> · Total fires: ${Number(p.totalFire).toLocaleString()} · Pop: ${Number(p.population).toLocaleString()}`;
 }
 
 // ============================================================
@@ -644,7 +644,7 @@ function initScrollytelling() {
     });
   });
 
-  // Sparklines — only create once, after a short delay so DOM is ready
+  // Sparklines  - only create once, after a short delay so DOM is ready
   setTimeout(() => {
     createSparkline('spark-entry', DATA.ssSubtypesByYear['Effecting entry/exit'], C.fire);
     createSparkline('spark-flood', DATA.ssSubtypesByYear['Flooding'], C.teal);
@@ -741,22 +741,22 @@ function setupScrollama() {
         mapSignals.setPaintProperty('kde-entry', 'fill-opacity', 0.85);
         mapSignals.flyTo({ center: [-0.08, 51.52], zoom: 10.5, pitch: 30, duration: 2000 });
         overlay.style.display = 'block';
-        overlay.textContent = 'KDE density: Forced Entry — concentrated in inner boroughs';
+        overlay.textContent = 'KDE density: Forced Entry  - concentrated in inner boroughs';
       } else if (step === 'flood') {
         mapSignals.setPaintProperty('kde-flood', 'fill-opacity', 0.85);
         mapSignals.flyTo({ center: [-0.12, 51.49], zoom: 10.8, pitch: 0, duration: 2000 });
         overlay.style.display = 'block';
-        overlay.textContent = 'KDE density: Flooding — Thames corridor hotspots';
+        overlay.textContent = 'KDE density: Flooding  - Thames corridor hotspots';
       } else if (step === 'assist') {
         mapSignals.setPaintProperty('kde-assist', 'fill-opacity', 0.85);
         mapSignals.flyTo({ center: [-0.1, 51.51], zoom: 9.5, pitch: 40, duration: 2000 });
         overlay.style.display = 'block';
-        overlay.textContent = 'KDE density: Agency Assist — central London concentration';
+        overlay.textContent = 'KDE density: Agency Assist  - central London concentration';
       } else if (step === 'divide') {
         mapSignals.setPaintProperty('kde-ss', 'fill-opacity', 0.85);
         mapSignals.flyTo({ center: [-0.1, 51.51], zoom: 9.2, pitch: 0, duration: 2000 });
         overlay.style.display = 'block';
-        overlay.textContent = 'KDE density: All Special Service — note outer London spread';
+        overlay.textContent = 'KDE density: All Special Service  - note outer London spread';
       }
     }).onStepExit(({ element, direction }) => {
       // When scrolling back up past intro, reset
