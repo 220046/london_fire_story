@@ -13,12 +13,8 @@ mapboxgl.accessToken = 'pk.eyJ1IjoieGltZW5' + 'nMDExNiIsImEiOiJjbTdhZGNwbzMwMzd1
 // INIT
 // ============================================================
 document.addEventListener('DOMContentLoaded', async () => {
-  const [res, kdeRes] = await Promise.all([
-    fetch('data/fire_data.json'),
-    fetch('data/borough_kde.json'),
-  ]);
+  const res = await fetch('data/fire_data.json');
   DATA = await res.json();
-  KDE = await kdeRes.json();
 
   initHero();
   initNav();
@@ -482,17 +478,15 @@ function createChartQuartile() {
 // CH3: DUAL SYNCED MAPS
 // ============================================================
 async function initDualMaps() {
-  const geoRes = await fetch('data/london_boroughs.json');
-  const geoData = await geoRes.json();
+  const [boroughRes, gridFireRes] = await Promise.all([
+    fetch('data/london_boroughs.json').then(r => r.json()),
+    fetch('data/grid_fire.json').then(r => r.json()),
+  ]);
 
-  // Attach borough data + KDE values to GeoJSON
-  geoData.features.forEach(f => {
-    const name = f.properties.name;
-    const bd = DATA.boroughData[name];
+  // Attach borough data
+  boroughRes.features.forEach(f => {
+    const bd = DATA.boroughData[f.properties.name];
     if (bd) Object.assign(f.properties, bd);
-    // Attach KDE density (case-insensitive match)
-    const kdeKey = Object.keys(KDE.fire_kde).find(k => k.toLowerCase() === name.toLowerCase());
-    f.properties.fireKDE = kdeKey ? KDE.fire_kde[kdeKey] : 0;
   });
 
   const mapConfig = {
@@ -504,12 +498,10 @@ async function initDualMaps() {
   mapFire = new mapboxgl.Map({ container: 'map-fire', ...mapConfig });
   mapResponse = new mapboxgl.Map({ container: 'map-response', ...mapConfig });
 
-  // Sync cameras (with guard against infinite loop)
   let syncing = false;
   function syncMaps(source, target) {
     source.on('move', () => {
-      if (syncing) return;
-      syncing = true;
+      if (syncing) return; syncing = true;
       target.jumpTo({ center: source.getCenter(), zoom: source.getZoom(), bearing: source.getBearing(), pitch: source.getPitch() });
       syncing = false;
     });
@@ -517,57 +509,73 @@ async function initDualMaps() {
   syncMaps(mapFire, mapResponse);
   syncMaps(mapResponse, mapFire);
 
-  function addBoroughLayers(map, fillId, prop, colorStops) {
-    map.addSource('boroughs', { type: 'geojson', data: geoData });
-    map.addLayer({
-      id: fillId, type: 'fill', source: 'boroughs',
+  // LEFT: 250m grid fire density
+  mapFire.on('load', () => {
+    mapFire.addSource('grid-fire', { type: 'geojson', data: gridFireRes });
+    mapFire.addSource('boroughs', { type: 'geojson', data: boroughRes });
+
+    mapFire.addLayer({
+      id: 'grid-fill', type: 'fill', source: 'grid-fire',
       paint: {
-        'fill-color': ['interpolate', ['linear'], ['get', prop], ...colorStops],
+        'fill-color': ['interpolate', ['linear'], ['get', 'd'],
+          0, '#1a1a2e', 15, '#2d4a3e', 30, '#4ecdc4', 50, '#ffe66d', 75, '#ff6b35', 100, '#ff0000'],
+        'fill-opacity': 0.85,
+      }
+    });
+    mapFire.addLayer({
+      id: 'borough-lines-l', type: 'line', source: 'boroughs',
+      paint: { 'line-color': 'rgba(255,255,255,0.3)', 'line-width': 1.2 }
+    });
+
+    // Hover on grid cell
+    mapFire.on('mousemove', 'grid-fill', e => {
+      if (!e.features.length) return;
+      mapFire.getCanvas().style.cursor = 'pointer';
+      const p = e.features[0].properties;
+      document.getElementById('hover-info').innerHTML =
+        `250m grid cell - Incidents: <em>${p.c}</em> - Density index: <em>${p.d}</em>`;
+    });
+    mapFire.on('mouseleave', 'grid-fill', () => {
+      mapFire.getCanvas().style.cursor = '';
+      document.getElementById('hover-info').innerHTML = '<span class="hover-hint">Hover over a grid cell or borough to compare</span>';
+    });
+    checkBothLoaded();
+  });
+
+  // RIGHT: Borough response time choropleth
+  mapResponse.on('load', () => {
+    mapResponse.addSource('boroughs', { type: 'geojson', data: boroughRes });
+    mapResponse.addLayer({
+      id: 'fill-resp', type: 'fill', source: 'boroughs',
+      paint: {
+        'fill-color': ['interpolate', ['linear'], ['get', 'avgResponseSec'],
+          265, '#1a1a2e', 285, '#2d4a3e', 305, '#4ecdc4', 330, '#ffe66d', 355, '#ff6b35', 390, '#ff0000'],
         'fill-opacity': 0.8,
       }
     });
-    map.addLayer({
-      id: fillId + '-line', type: 'line', source: 'boroughs',
+    mapResponse.addLayer({
+      id: 'resp-lines', type: 'line', source: 'boroughs',
       paint: { 'line-color': 'rgba(255,255,255,0.2)', 'line-width': 1 }
     });
-    map.addLayer({
-      id: fillId + '-hover', type: 'line', source: 'boroughs',
+    mapResponse.addLayer({
+      id: 'resp-hover', type: 'line', source: 'boroughs',
       paint: { 'line-color': '#fff', 'line-width': 2.5 },
       filter: ['==', 'name', '']
     });
 
-    map.on('mousemove', fillId, e => {
+    mapResponse.on('mousemove', 'fill-resp', e => {
       if (!e.features.length) return;
-      const name = e.features[0].properties.name;
-      setHover(name);
-      updateHoverInfo(e.features[0].properties);
-      map.getCanvas().style.cursor = 'pointer';
+      const p = e.features[0].properties;
+      mapResponse.setFilter('resp-hover', ['==', 'name', p.name]);
+      mapResponse.getCanvas().style.cursor = 'pointer';
+      document.getElementById('hover-info').innerHTML =
+        `<strong>${p.name}</strong> - Response: <em>${p.avgResponseSec}s</em> - Total fires: ${Number(p.totalFire).toLocaleString()} - Pop: ${Number(p.population).toLocaleString()}`;
     });
-    map.on('mouseleave', fillId, () => {
-      setHover('');
-      map.getCanvas().style.cursor = '';
-      document.getElementById('hover-info').innerHTML = '<span class="hover-hint">Hover over a borough on either map to compare</span>';
+    mapResponse.on('mouseleave', 'fill-resp', () => {
+      mapResponse.setFilter('resp-hover', ['==', 'name', '']);
+      mapResponse.getCanvas().style.cursor = '';
+      document.getElementById('hover-info').innerHTML = '<span class="hover-hint">Hover over a grid cell or borough to compare</span>';
     });
-  }
-
-  function setHover(name) {
-    ['fill-fire-hover', 'fill-resp-hover'].forEach(id => {
-      const m = id.startsWith('fill-fire') ? mapFire : mapResponse;
-      if (m.getLayer(id)) m.setFilter(id, ['==', 'name', name]);
-    });
-  }
-
-  // LEFT: Fire KDE density choropleth
-  mapFire.on('load', () => {
-    addBoroughLayers(mapFire, 'fill-fire', 'fireKDE',
-      [0, '#1a1a2e', 5, '#2d4a3e', 12, '#4ecdc4', 20, '#ffe66d', 30, '#ff6b35', 42, '#ff0000']);
-    checkBothLoaded();
-  });
-
-  // RIGHT: Response time choropleth
-  mapResponse.on('load', () => {
-    addBoroughLayers(mapResponse, 'fill-resp', 'avgResponseSec',
-      [265, '#1a1a2e', 285, '#2d4a3e', 305, '#4ecdc4', 330, '#ffe66d', 355, '#ff6b35', 390, '#ff0000']);
     checkBothLoaded();
   });
 
@@ -583,28 +591,17 @@ async function initDualMaps() {
   }
 }
 
-function updateHoverInfo(p) {
-  const kde = p.fireKDE ? p.fireKDE.toFixed(1) : ' -';
-  document.getElementById('hover-info').innerHTML =
-    `<strong>${p.name}</strong>  - KDE density: <em>${kde}</em> · Response: <em>${p.avgResponseSec}s</em> · Total fires: ${Number(p.totalFire).toLocaleString()} · Pop: ${Number(p.population).toLocaleString()}`;
-}
-
 // ============================================================
 // CH4: SCROLLYTELLING MAP
 // ============================================================
 function initScrollytelling() {
   // Load all heatmap data + borough boundaries in parallel
-  fetch('data/london_boroughs.json').then(r => r.json()).then(boroughs => {
-    // Attach all KDE values to GeoJSON
-    boroughs.features.forEach(f => {
-      const name = f.properties.name;
-      const bd = DATA.boroughData[name];
-      if (bd) Object.assign(f.properties, bd);
-      ['fire_kde','entry_kde','flood_kde','assist_kde','ss_kde'].forEach(k => {
-        const key = Object.keys(KDE[k] || {}).find(n => n.toLowerCase() === name.toLowerCase());
-        f.properties[k] = key ? KDE[k][key] : 0;
-      });
-    });
+  Promise.all([
+    fetch('data/london_boroughs.json').then(r => r.json()),
+    fetch('data/grid_entry.json').then(r => r.json()),
+    fetch('data/grid_flood.json').then(r => r.json()),
+    fetch('data/grid_assist.json').then(r => r.json()),
+  ]).then(([boroughs, gridEntry, gridFlood, gridAssist]) => {
 
     mapSignals = new mapboxgl.Map({
       container: 'map-signals',
@@ -614,27 +611,30 @@ function initScrollytelling() {
     });
 
     mapSignals.on('load', () => {
+      // Borough boundaries as reference
       mapSignals.addSource('boroughs', { type: 'geojson', data: boroughs });
-
-      // Borough boundary lines
       mapSignals.addLayer({
         id: 'borough-lines', type: 'line', source: 'boroughs',
-        paint: { 'line-color': 'rgba(255,255,255,0.25)', 'line-width': 1 }
+        paint: { 'line-color': 'rgba(255,255,255,0.2)', 'line-width': 0.8 }
       });
 
-      // KDE choropleth layers (all start transparent)
-      const layers = {
-        'kde-entry': { prop: 'entry_kde', stops: [0,'#1a1a2e', 10,'#2d4a3e', 20,'#e76f51', 35,'#ff6b35', 55,'#ff0000'] },
-        'kde-flood': { prop: 'flood_kde', stops: [0,'#1a1a2e', 10,'#2d4a3e', 20,'#4ecdc4', 35,'#ffe66d', 55,'#ff6b35'] },
-        'kde-assist':{ prop: 'assist_kde',stops: [0,'#1a1a2e', 10,'#2d4a3e', 20,'#ffe66d', 35,'#ff6b35', 55,'#ff0000'] },
-        'kde-ss':    { prop: 'ss_kde',    stops: [0,'#1a1a2e', 10,'#2d4a3e', 20,'#4ecdc4', 35,'#ffe66d', 55,'#ff6b35'] },
+      // 250m grid sources
+      mapSignals.addSource('grid-entry', { type: 'geojson', data: gridEntry });
+      mapSignals.addSource('grid-flood', { type: 'geojson', data: gridFlood });
+      mapSignals.addSource('grid-assist', { type: 'geojson', data: gridAssist });
+
+      // Grid choropleth layers (all start transparent)
+      const gridLayers = {
+        'grd-entry': { src: 'grid-entry', stops: [0,'#1a1a2e', 15,'#2d4a3e', 30,'#e76f51', 55,'#ff6b35', 80,'#ff0000'] },
+        'grd-flood': { src: 'grid-flood', stops: [0,'#1a1a2e', 15,'#2d4a3e', 30,'#4ecdc4', 55,'#ffe66d', 80,'#ff6b35'] },
+        'grd-assist':{ src: 'grid-assist',stops: [0,'#1a1a2e', 15,'#2d4a3e', 30,'#ffe66d', 55,'#ff6b35', 80,'#ff0000'] },
       };
 
-      Object.entries(layers).forEach(([id, cfg]) => {
+      Object.entries(gridLayers).forEach(([id, cfg]) => {
         mapSignals.addLayer({
-          id, type: 'fill', source: 'boroughs',
+          id, type: 'fill', source: cfg.src,
           paint: {
-            'fill-color': ['interpolate', ['linear'], ['get', cfg.prop], ...cfg.stops],
+            'fill-color': ['interpolate', ['linear'], ['get', 'd'], ...cfg.stops],
             'fill-opacity': 0,
           }
         }, 'borough-lines');
@@ -727,8 +727,8 @@ function setupScrollama() {
 
       if (!mapSignals) return;
 
-      // Hide all KDE choropleth layers
-      ['kde-entry', 'kde-flood', 'kde-assist', 'kde-ss'].forEach(id => {
+      // Hide all grid layers
+      ['grd-entry', 'grd-flood', 'grd-assist'].forEach(id => {
         if (mapSignals.getLayer(id)) {
           mapSignals.setPaintProperty(id, 'fill-opacity', 0);
         }
@@ -738,25 +738,26 @@ function setupScrollama() {
         mapSignals.flyTo({ center: [-0.1, 51.51], zoom: 9.5, pitch: 0, duration: 1500 });
         overlay.style.display = 'none';
       } else if (step === 'entry') {
-        mapSignals.setPaintProperty('kde-entry', 'fill-opacity', 0.85);
+        mapSignals.setPaintProperty('grd-entry', 'fill-opacity', 0.85);
         mapSignals.flyTo({ center: [-0.08, 51.52], zoom: 10.5, pitch: 30, duration: 2000 });
         overlay.style.display = 'block';
-        overlay.textContent = 'KDE density: Forced Entry  - concentrated in inner boroughs';
+        overlay.textContent = '250m grid: Forced Entry density - concentrated in inner boroughs';
       } else if (step === 'flood') {
-        mapSignals.setPaintProperty('kde-flood', 'fill-opacity', 0.85);
+        mapSignals.setPaintProperty('grd-flood', 'fill-opacity', 0.85);
         mapSignals.flyTo({ center: [-0.12, 51.49], zoom: 10.8, pitch: 0, duration: 2000 });
         overlay.style.display = 'block';
-        overlay.textContent = 'KDE density: Flooding  - Thames corridor hotspots';
+        overlay.textContent = '250m grid: Flooding density - Thames corridor hotspots';
       } else if (step === 'assist') {
-        mapSignals.setPaintProperty('kde-assist', 'fill-opacity', 0.85);
+        mapSignals.setPaintProperty('grd-assist', 'fill-opacity', 0.85);
         mapSignals.flyTo({ center: [-0.1, 51.51], zoom: 9.5, pitch: 40, duration: 2000 });
         overlay.style.display = 'block';
-        overlay.textContent = 'KDE density: Agency Assist  - central London concentration';
+        overlay.textContent = '250m grid: Agency Assist density - central London concentration';
       } else if (step === 'divide') {
-        mapSignals.setPaintProperty('kde-ss', 'fill-opacity', 0.85);
+        // Show all three grids together for comparison
+        mapSignals.setPaintProperty('grd-entry', 'fill-opacity', 0.6);
         mapSignals.flyTo({ center: [-0.1, 51.51], zoom: 9.2, pitch: 0, duration: 2000 });
         overlay.style.display = 'block';
-        overlay.textContent = 'KDE density: All Special Service  - note outer London spread';
+        overlay.textContent = '250m grid: Forced Entry - outer London demand spreading outward';
       }
     }).onStepExit(({ element, direction }) => {
       // When scrolling back up past intro, reset
