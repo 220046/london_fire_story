@@ -478,16 +478,11 @@ function createChartQuartile() {
 // CH3: DUAL SYNCED MAPS
 // ============================================================
 async function initDualMaps() {
-  const [boroughRes, gridFireRes] = await Promise.all([
+  const [boroughRes, gridFireRes, gridRespRes] = await Promise.all([
     fetch('data/london_boroughs.json').then(r => r.json()),
     fetch('data/grid_fire.json').then(r => r.json()),
+    fetch('data/grid_response.json').then(r => r.json()),
   ]);
-
-  // Attach borough data
-  boroughRes.features.forEach(f => {
-    const bd = DATA.boroughData[f.properties.name];
-    if (bd) Object.assign(f.properties, bd);
-  });
 
   const mapConfig = {
     style: 'mapbox://styles/mapbox/dark-v11',
@@ -552,39 +547,39 @@ async function initDualMaps() {
     checkBothLoaded();
   });
 
-  // RIGHT: Borough response time choropleth
+  // RIGHT: 250m grid response time
   mapResponse.on('load', () => {
+    mapResponse.addSource('grid-resp', { type: 'geojson', data: gridRespRes });
     mapResponse.addSource('boroughs', { type: 'geojson', data: boroughRes });
+
     mapResponse.addLayer({
-      id: 'fill-resp', type: 'fill', source: 'boroughs',
+      id: 'grid-resp-fill', type: 'fill', source: 'grid-resp',
       paint: {
-        'fill-color': ['interpolate', ['linear'], ['get', 'avgResponseSec'],
-          265, '#1a1a2e', 285, '#2d4a3e', 305, '#4ecdc4', 330, '#ffe66d', 355, '#ff6b35', 390, '#ff0000'],
-        'fill-opacity': 0.8,
+        'fill-color': ['interpolate', ['linear'], ['get', 'd'],
+          0, '#1a1a2e', 20, '#2d4a3e', 40, '#4ecdc4', 60, '#ffe66d', 80, '#ff6b35', 100, '#ff0000'],
+        'fill-opacity': 0.85,
       }
     });
     mapResponse.addLayer({
-      id: 'resp-lines', type: 'line', source: 'boroughs',
-      paint: { 'line-color': 'rgba(255,255,255,0.2)', 'line-width': 1 }
+      id: 'borough-lines-r', type: 'line', source: 'boroughs',
+      paint: { 'line-color': 'rgba(255,255,255,0.7)', 'line-width': 1.8 }
     });
     mapResponse.addLayer({
-      id: 'resp-hover', type: 'line', source: 'boroughs',
-      paint: { 'line-color': '#fff', 'line-width': 2.5 },
-      filter: ['==', 'name', '']
+      id: 'borough-labels-r', type: 'symbol', source: 'boroughs',
+      layout: { 'text-field': ['get', 'name'], 'text-size': 10, 'text-anchor': 'center' },
+      paint: { 'text-color': 'rgba(255,255,255,0.5)', 'text-halo-color': 'rgba(0,0,0,0.6)', 'text-halo-width': 1 }
     });
 
-    mapResponse.on('mousemove', 'fill-resp', e => {
+    mapResponse.on('mousemove', 'grid-resp-fill', e => {
       if (!e.features.length) return;
-      const p = e.features[0].properties;
-      mapResponse.setFilter('resp-hover', ['==', 'name', p.name]);
       mapResponse.getCanvas().style.cursor = 'pointer';
+      const p = e.features[0].properties;
       document.getElementById('hover-info').innerHTML =
-        `<strong>${p.name}</strong> - Response: <em>${p.avgResponseSec}s</em> - Total fires: ${Number(p.totalFire).toLocaleString()} - Pop: ${Number(p.population).toLocaleString()}`;
+        `250m grid - Avg response: <em>${p.r}s</em> - Incidents: ${p.c}`;
     });
-    mapResponse.on('mouseleave', 'fill-resp', () => {
-      mapResponse.setFilter('resp-hover', ['==', 'name', '']);
+    mapResponse.on('mouseleave', 'grid-resp-fill', () => {
       mapResponse.getCanvas().style.cursor = '';
-      document.getElementById('hover-info').innerHTML = '<span class="hover-hint">Hover over a grid cell or borough to compare</span>';
+      document.getElementById('hover-info').innerHTML = '<span class="hover-hint">Hover over a grid cell to compare</span>';
     });
     checkBothLoaded();
   });
