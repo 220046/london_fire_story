@@ -104,22 +104,25 @@
   <section id="ch3" class="chapter">
     <div class="chapter-header"><span class="ch-num">03</span><h2>Who Still Burns?</h2></div>
     <div class="ch3-body">
+      <div class="ch3-framework">
+        <p class="framework-text">Following the UNDRR disaster risk framework (Sendai Framework, 2015) and UK fire service risk assessment practice (IRMP), fire risk is the intersection of <strong>spatial hazard</strong> and <strong>social vulnerability</strong>. The 250m grid captures where fires cluster; the IMD index captures who is least resilient to their impact (Jennings, 2013; Chhetri et al., 2010).</p>
+      </div>
       <div class="ch3-row">
-        <div class="ch3-text"><h3>The Seasonal Surprise</h3><p>Most people assume winter is fire season. <strong>They're wrong.</strong> July has the most fires  - outdoor fires surge <em>3.8×</em> in summer while dwelling fires stay flat.</p></div>
+        <div class="ch3-text"><h3>The Seasonal Surprise</h3><p>Most people assume winter is fire season. <strong>They're wrong.</strong> July has the most fires - outdoor fires surge <em>3.8x</em> in summer while dwelling fires stay flat.</p></div>
         <div class="chart-box"><canvas id="chart-monthly"></canvas></div>
       </div>
       <div class="ch3-maps">
-        <h3 class="maps-h">Fire Incident Density vs Response Time</h3>
-        <p class="maps-sub">Left: 250m grid aggregation of fire incidents (2009-2025) | Right: average first-pump response time by borough</p>
+        <h3 class="maps-h">Spatial Hazard vs Response Capacity</h3>
+        <p class="maps-sub">Left: 250m grid fire incident density (2009-2025) | Right: average first-pump response time by borough</p>
         <div class="dual-maps">
           <div class="map-half"><div class="map-lbl"><span class="lbl-dot dot-fire"></span> Fire Density (250m grid)</div><div id="map-fire" class="map-box"></div></div>
           <div class="map-half"><div class="map-lbl"><span class="lbl-dot dot-teal"></span> Avg Response Time (seconds)</div><div id="map-response" class="map-box"></div></div>
         </div>
-        <div id="hover-info" class="hover-info"><span class="hover-hint">Hover over a borough on either map to compare</span></div>
+        <div id="hover-info" class="hover-info"><span class="hover-hint">Hover over a grid cell or borough to compare</span></div>
       </div>
       <div class="ch3-row ch3-evidence">
         <div class="chart-box chart-sm"><canvas id="chart-quartile"></canvas></div>
-        <div class="ch3-text"><h3>The Proof</h3><p>The poorest quarter of wards has <strong class="big-n">64%</strong> higher fire rates than the richest.</p><p class="stat-note">Pearson r = 0.25, p &lt; 0.001  - statistically significant across 501 wards</p><p class="stat-cite">Data: IMD 2019 (MHCLG) × LFB Incidents 2018-2023</p></div>
+        <div class="ch3-text"><h3>Social Vulnerability: The Proof</h3><p>The poorest quarter of wards has <strong class="big-n">64%</strong> higher fire rates than the richest.</p><p class="stat-note">Pearson r = 0.25, p &lt; 0.001 - statistically significant across 501 wards</p><p class="stat-cite">Data: IMD 2019 (MHCLG) x LFB Incidents 2018-2023</p></div>
       </div>
     </div>
   </section>
@@ -172,11 +175,14 @@
         <p>1,952,560 LFB incident records (2009-2025) from <a href="https://data.london.gov.uk/" target="_blank">London Datastore</a> (OGL v2). Ward-level IMD 2019 from MHCLG. Statistical correlations via Pearson and Spearman tests.</p>
         <h4>References</h4>
         <ul>
-          <li>Meerow et al. (2016) Defining urban resilience. <em>Landscape &amp; Urban Planning</em>, 147.</li>
-          <li>Jennings (2013) Social characteristics as determinants of residential fire risk. <em>Fire Safety J.</em>, 62.</li>
-          <li>Singleton et al. (2018) <em>Urban Analytics</em>. SAGE.</li>
-          <li>Taylor (2016) London's burning: Impact of 2014 station closures.</li>
-          <li>London Fire Brigade Annual Reports 2009-2025.</li>
+          <li>UNDRR (2015) Sendai Framework for Disaster Risk Reduction 2015-2030. United Nations.</li>
+          <li>Meerow, S. et al. (2016) Defining urban resilience: A review. <em>Landscape &amp; Urban Planning</em>, 147.</li>
+          <li>Jennings, C.R. (2013) Social and economic characteristics as determinants of residential fire risk. <em>Fire Safety J.</em>, 62.</li>
+          <li>Chhetri, P. et al. (2010) Modelling spatial patterns of residential fire incidence. <em>Fire Safety J.</em>, 45(3).</li>
+          <li>Corcoran, J. et al. (2007) Spatial analytical techniques to explore patterns of fire incidence. <em>Computers, Environment and Urban Systems</em>, 31(6).</li>
+          <li>Singleton, A. et al. (2018) <em>Urban Analytics</em>. SAGE.</li>
+          <li>Qin, X. et al. (2025) Enhancing urban resilience through ML-supported flood risk assessment. <em>npj Urban Sustainability</em>, 5:19.</li>
+          <li>London Fire Brigade Community Risk Management Plan; Annual Reports 2009-2025.</li>
         </ul>
       </div>
       <div class="credits"><p>CASA0029 Urban Data Visualisation · UCL 2025-26</p></div>
