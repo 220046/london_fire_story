@@ -480,7 +480,7 @@ function createChartQuartile() {
 async function initDualMaps() {
   const [boroughRes, gridFireRes, gridRespRes] = await Promise.all([
     fetch('data/london_boroughs.json').then(r => r.json()),
-    fetch('data/grid_fire.json').then(r => r.json()),
+    fetch('data/grid_fire_time.json').then(r => r.json()),
     fetch('data/grid_response.json').then(r => r.json()),
   ]);
 
@@ -504,7 +504,23 @@ async function initDualMaps() {
   syncMaps(mapFire, mapResponse);
   syncMaps(mapResponse, mapFire);
 
-  // LEFT: 250m grid fire density
+  // Period config
+  const PERIODS = [
+    { key: 'a', label: '2009-2011' },
+    { key: 'b', label: '2012-2014' },
+    { key: 'c', label: '2015-2017' },
+    { key: 'd', label: '2018-2020' },
+    { key: 'e', label: '2021-2023' },
+    { key: 'f', label: '2024-2025' },
+  ];
+  let currentPeriod = 'a';
+
+  function getFireColorExpr(prop) {
+    return ['interpolate', ['linear'], ['get', prop],
+      0, '#1a1a2e', 3, '#2d4a3e', 8, '#4ecdc4', 15, '#ffe66d', 25, '#ff6b35', 50, '#ff0000'];
+  }
+
+  // LEFT: 250m grid fire density with temporal slider
   mapFire.on('load', () => {
     mapFire.addSource('grid-fire', { type: 'geojson', data: gridFireRes });
     mapFire.addSource('boroughs', { type: 'geojson', data: boroughRes });
@@ -512,8 +528,7 @@ async function initDualMaps() {
     mapFire.addLayer({
       id: 'grid-fill', type: 'fill', source: 'grid-fire',
       paint: {
-        'fill-color': ['interpolate', ['linear'], ['get', 'd'],
-          0, '#1a1a2e', 15, '#2d4a3e', 30, '#4ecdc4', 50, '#ffe66d', 75, '#ff6b35', 100, '#ff0000'],
+        'fill-color': getFireColorExpr('a'),
         'fill-opacity': 0.85,
       }
     });
@@ -521,29 +536,65 @@ async function initDualMaps() {
       id: 'borough-lines-l', type: 'line', source: 'boroughs',
       paint: { 'line-color': 'rgba(255,255,255,0.7)', 'line-width': 1.8 }
     });
-    // Borough labels
     mapFire.addLayer({
       id: 'borough-labels-l', type: 'symbol', source: 'boroughs',
-      layout: {
-        'text-field': ['get', 'name'],
-        'text-size': 10,
-        'text-anchor': 'center',
-      },
+      layout: { 'text-field': ['get', 'name'], 'text-size': 10, 'text-anchor': 'center' },
       paint: { 'text-color': 'rgba(255,255,255,0.5)', 'text-halo-color': 'rgba(0,0,0,0.6)', 'text-halo-width': 1 }
     });
 
-    // Hover on grid cell
     mapFire.on('mousemove', 'grid-fill', e => {
       if (!e.features.length) return;
       mapFire.getCanvas().style.cursor = 'pointer';
       const p = e.features[0].properties;
+      const val = p[currentPeriod] || 0;
       document.getElementById('hover-info').innerHTML =
-        `250m grid cell - Incidents: <em>${p.c}</em> - Density index: <em>${p.d}</em>`;
+        `250m grid - Period incidents: <em>${val}</em> - Total (all years): ${p.t}`;
     });
     mapFire.on('mouseleave', 'grid-fill', () => {
       mapFire.getCanvas().style.cursor = '';
-      document.getElementById('hover-info').innerHTML = '<span class="hover-hint">Hover over a grid cell or borough to compare</span>';
+      document.getElementById('hover-info').innerHTML = '<span class="hover-hint">Hover over a grid cell to compare. Drag slider or press Play.</span>';
     });
+
+    // Time slider
+    const slider = document.getElementById('time-slider');
+    const label = document.getElementById('time-label');
+    const playBtn = document.getElementById('time-play');
+
+    function setPeriod(idx) {
+      const p = PERIODS[idx];
+      currentPeriod = p.key;
+      label.textContent = p.label;
+      slider.value = idx;
+      if (mapFire.getLayer('grid-fill')) {
+        mapFire.setPaintProperty('grid-fill', 'fill-color', getFireColorExpr(p.key));
+      }
+    }
+
+    slider.addEventListener('input', () => setPeriod(parseInt(slider.value)));
+
+    let playing = false;
+    let playInterval = null;
+    playBtn.addEventListener('click', () => {
+      if (playing) {
+        clearInterval(playInterval);
+        playBtn.textContent = 'Play';
+        playing = false;
+      } else {
+        playing = true;
+        playBtn.textContent = 'Pause';
+        let idx = parseInt(slider.value);
+        playInterval = setInterval(() => {
+          idx = (idx + 1) % PERIODS.length;
+          setPeriod(idx);
+          if (idx === PERIODS.length - 1) {
+            clearInterval(playInterval);
+            playBtn.textContent = 'Play';
+            playing = false;
+          }
+        }, 1500);
+      }
+    });
+
     checkBothLoaded();
   });
 

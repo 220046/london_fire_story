@@ -282,6 +282,31 @@ body {
 .maps-h { font-family:var(--font-head); font-size:1.3rem; margin-bottom:0.3rem; text-align:center; }
 .maps-sub { font-size:0.85rem; color:var(--dim); text-align:center; margin-bottom:1rem; }
 
+.time-slider-row {
+  display:flex; align-items:center; gap:1rem;
+  margin-bottom:1rem; padding:0.8rem 1rem;
+  background:var(--glass); border:1px solid var(--glass-border);
+  border-radius:8px;
+}
+.time-btn {
+  padding:0.4rem 1rem; font-size:0.8rem; font-family:var(--font-head);
+  background:var(--fire); color:#fff; border:none; border-radius:4px;
+  cursor:pointer; white-space:nowrap;
+}
+.time-btn:hover { opacity:0.85; }
+#time-slider {
+  flex:1; height:4px; -webkit-appearance:none; appearance:none;
+  background:var(--glass-border); border-radius:2px; outline:none;
+}
+#time-slider::-webkit-slider-thumb {
+  -webkit-appearance:none; width:16px; height:16px;
+  background:var(--fire); border-radius:50%; cursor:pointer;
+}
+.time-label {
+  font-family:var(--font-mono); font-size:0.85rem; color:var(--fire);
+  min-width:90px; text-align:right;
+}
+
 .dual-maps { display:flex; gap:1rem; height:420px; }
 .map-half { flex:1; display:flex; flex-direction:column; }
 .map-lbl {
