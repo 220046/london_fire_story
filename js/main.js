@@ -524,7 +524,17 @@ async function initDualMaps() {
     });
     mapFire.addLayer({
       id: 'borough-lines-l', type: 'line', source: 'boroughs',
-      paint: { 'line-color': 'rgba(255,255,255,0.3)', 'line-width': 1.2 }
+      paint: { 'line-color': 'rgba(255,255,255,0.7)', 'line-width': 1.8 }
+    });
+    // Borough labels
+    mapFire.addLayer({
+      id: 'borough-labels-l', type: 'symbol', source: 'boroughs',
+      layout: {
+        'text-field': ['get', 'name'],
+        'text-size': 10,
+        'text-anchor': 'center',
+      },
+      paint: { 'text-color': 'rgba(255,255,255,0.5)', 'text-halo-color': 'rgba(0,0,0,0.6)', 'text-halo-width': 1 }
     });
 
     // Hover on grid cell
@@ -615,7 +625,12 @@ function initScrollytelling() {
       mapSignals.addSource('boroughs', { type: 'geojson', data: boroughs });
       mapSignals.addLayer({
         id: 'borough-lines', type: 'line', source: 'boroughs',
-        paint: { 'line-color': 'rgba(255,255,255,0.2)', 'line-width': 0.8 }
+        paint: { 'line-color': 'rgba(255,255,255,0.7)', 'line-width': 1.8 }
+      });
+      mapSignals.addLayer({
+        id: 'borough-labels', type: 'symbol', source: 'boroughs',
+        layout: { 'text-field': ['get', 'name'], 'text-size': 9, 'text-anchor': 'center' },
+        paint: { 'text-color': 'rgba(255,255,255,0.45)', 'text-halo-color': 'rgba(0,0,0,0.6)', 'text-halo-width': 1 }
       });
 
       // 250m grid sources
