@@ -623,11 +623,11 @@ function initScrollytelling() {
       mapSignals.addSource('grid-flood', { type: 'geojson', data: gridFlood });
       mapSignals.addSource('grid-assist', { type: 'geojson', data: gridAssist });
 
-      // Grid choropleth layers (all start transparent)
+      // Grid choropleth layers - each signal has a distinct color ramp
       const gridLayers = {
-        'grd-entry': { src: 'grid-entry', stops: [0,'#1a1a2e', 15,'#2d4a3e', 30,'#e76f51', 55,'#ff6b35', 80,'#ff0000'] },
-        'grd-flood': { src: 'grid-flood', stops: [0,'#1a1a2e', 15,'#2d4a3e', 30,'#4ecdc4', 55,'#ffe66d', 80,'#ff6b35'] },
-        'grd-assist':{ src: 'grid-assist',stops: [0,'#1a1a2e', 15,'#2d4a3e', 30,'#ffe66d', 55,'#ff6b35', 80,'#ff0000'] },
+        'grd-entry': { src: 'grid-entry', stops: [0,'#2b1055', 15,'#6a2c70', 30,'#b83b5e', 55,'#f08a5d', 80,'#f9ed69', 100,'#fffde7'] },
+        'grd-flood': { src: 'grid-flood', stops: [0,'#0a2342', 15,'#1a4a6e', 30,'#2a7da8', 55,'#4ecdc4', 80,'#a8edea', 100,'#e0fffe'] },
+        'grd-assist':{ src: 'grid-assist',stops: [0,'#1a1a2e', 15,'#2d4a3e', 30,'#4ecdc4', 55,'#ffe66d', 80,'#ff6b35', 100,'#ff2200'] },
       };
 
       Object.entries(gridLayers).forEach(([id, cfg]) => {
@@ -734,30 +734,33 @@ function setupScrollama() {
         }
       });
 
+      // Full London center for all views
+      const fullLondon = { center: [-0.1, 51.51], zoom: 9.5 };
+
       if (step === 'intro') {
-        mapSignals.flyTo({ center: [-0.1, 51.51], zoom: 9.5, pitch: 0, duration: 1500 });
+        mapSignals.flyTo({ ...fullLondon, pitch: 0, bearing: 0, duration: 1500 });
         overlay.style.display = 'none';
       } else if (step === 'entry') {
-        mapSignals.setPaintProperty('grd-entry', 'fill-opacity', 0.85);
-        mapSignals.flyTo({ center: [-0.08, 51.52], zoom: 10.5, pitch: 30, duration: 2000 });
+        mapSignals.setPaintProperty('grd-entry', 'fill-opacity', 0.88);
+        mapSignals.flyTo({ ...fullLondon, pitch: 30, bearing: -10, duration: 2000 });
         overlay.style.display = 'block';
-        overlay.textContent = '250m grid: Forced Entry density - concentrated in inner boroughs';
+        overlay.textContent = '250m grid: Forced Entry density (purple-yellow)';
       } else if (step === 'flood') {
-        mapSignals.setPaintProperty('grd-flood', 'fill-opacity', 0.85);
-        mapSignals.flyTo({ center: [-0.12, 51.49], zoom: 10.8, pitch: 0, duration: 2000 });
+        mapSignals.setPaintProperty('grd-flood', 'fill-opacity', 0.88);
+        mapSignals.flyTo({ ...fullLondon, pitch: 0, bearing: 0, duration: 2000 });
         overlay.style.display = 'block';
-        overlay.textContent = '250m grid: Flooding density - Thames corridor hotspots';
+        overlay.textContent = '250m grid: Flooding density (blue-cyan)';
       } else if (step === 'assist') {
-        mapSignals.setPaintProperty('grd-assist', 'fill-opacity', 0.85);
-        mapSignals.flyTo({ center: [-0.1, 51.51], zoom: 9.5, pitch: 40, duration: 2000 });
+        mapSignals.setPaintProperty('grd-assist', 'fill-opacity', 0.88);
+        mapSignals.flyTo({ ...fullLondon, pitch: 40, bearing: 15, duration: 2000 });
         overlay.style.display = 'block';
-        overlay.textContent = '250m grid: Agency Assist density - central London concentration';
+        overlay.textContent = '250m grid: Agency Assist density (teal-orange)';
       } else if (step === 'divide') {
-        // Show all three grids together for comparison
-        mapSignals.setPaintProperty('grd-entry', 'fill-opacity', 0.6);
-        mapSignals.flyTo({ center: [-0.1, 51.51], zoom: 9.2, pitch: 0, duration: 2000 });
+        // Show entry grid (the largest signal) at flat overview
+        mapSignals.setPaintProperty('grd-entry', 'fill-opacity', 0.88);
+        mapSignals.flyTo({ ...fullLondon, pitch: 0, bearing: 0, duration: 2000 });
         overlay.style.display = 'block';
-        overlay.textContent = '250m grid: Forced Entry - outer London demand spreading outward';
+        overlay.textContent = '250m grid: Forced Entry - note outer London spread vs inner concentration';
       }
     }).onStepExit(({ element, direction }) => {
       // When scrolling back up past intro, reset
