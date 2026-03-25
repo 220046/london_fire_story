@@ -168,12 +168,17 @@
     <!-- 2c: Inner vs Outer trend -->
     <div class="ch-section">
       <h3 class="ch-subtitle">The Outward Shift</h3>
-      <div class="split-row">
-        <div class="split-text">
-          <p>Since 2014, inner London special service calls grew <strong>+21%</strong>. Outer London: <strong>+62%</strong>.</p>
-          <p>The fire service was built for a centralised city. London's emergency demand is decentralising - but the stations haven't moved.</p>
-        </div>
-        <div class="chart-box split-chart"><canvas id="chart-inout"></canvas></div>
+      <p class="ch-context">Across all three incident types, outer London is growing faster than inner London. The indexed chart below (2014 = 100) makes the divergence clear.</p>
+      <div class="inout-tabs">
+        <button class="pill active" data-io="all">All Types</button>
+        <button class="pill" data-io="Fire" style="--pill-c:#ff6b35">Fire</button>
+        <button class="pill" data-io="False Alarm" style="--pill-c:#888">False Alarm</button>
+        <button class="pill" data-io="Special Service" style="--pill-c:#4ecdc4">Special Service</button>
+      </div>
+      <div class="chart-box chart-wide"><canvas id="chart-inout"></canvas></div>
+      <div class="split-text" style="margin-top:1rem; text-align:center;">
+        <p>Fire: Inner <strong>-6.9%</strong> vs Outer <strong>+6.7%</strong>. False Alarm: Inner +26% vs Outer <strong>+35%</strong>. Special Service: Inner +89% vs Outer <strong>+104%</strong>.</p>
+        <p>The fire service was built for a centralised city. London's emergency demand is decentralising - but the stations haven't moved.</p>
       </div>
     </div>
 

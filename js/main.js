@@ -25,7 +25,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   createChartFA();
   createChartFireProp();
   createSlopeChart();
-  createChartInOut();
+  createChartInOut('all');
+  initInOutTabs();
   createChartQuartile();
   createChartMonthlyAll();
 
@@ -446,21 +447,64 @@ function initScatterPlot() {
 }
 
 // ============================================================
-// CH2: Inner vs Outer chart
+// CH2: Inner vs Outer indexed chart (2014=100) with type tabs
 // ============================================================
-function createChartInOut() {
-  const d = DATA.ssInnerOuter;
+function indexify(arr) {
+  const base = arr[0] || 1;
+  return arr.map(v => Math.round(v / base * 100));
+}
+
+function createChartInOut(filter) {
+  const io = DATA.innerOuter;
+  if (!io) return;
   killChart('inout');
+
+  let datasets = [];
+  const colors = { 'Fire': C.fire, 'False Alarm': C.dim, 'Special Service': C.teal };
+  const years = io['Fire'].years;
+
+  if (filter === 'all') {
+    Object.entries(io).forEach(([grp, d]) => {
+      const col = colors[grp] || '#888';
+      datasets.push({ label: grp + ' (Inner)', data: indexify(d.inner), borderColor: col, borderWidth: 2, pointRadius: 2, tension: 0.3, borderDash: [5,3] });
+      datasets.push({ label: grp + ' (Outer)', data: indexify(d.outer), borderColor: col, borderWidth: 2.5, pointRadius: 3, tension: 0.3 });
+    });
+  } else {
+    const d = io[filter];
+    const col = colors[filter];
+    datasets = [
+      { label: 'Inner London', data: indexify(d.inner), borderColor: col, borderWidth: 2, pointRadius: 2, tension: 0.3, borderDash: [5,3], backgroundColor: col + '10', fill: true },
+      { label: 'Outer London', data: indexify(d.outer), borderColor: col, borderWidth: 2.5, pointRadius: 3, tension: 0.3, backgroundColor: col + '15', fill: true },
+    ];
+  }
+
   charts.inout = new Chart(document.getElementById('chart-inout'), {
     type: 'line',
-    data: { labels: d.years, datasets: [
-      { label: 'Inner London SS', data: d.inner, borderColor: C.fire, backgroundColor: C.fire + '15', fill: true, borderWidth: 2, pointRadius: 2, tension: 0.3 },
-      { label: 'Outer London SS', data: d.outer, borderColor: C.teal, backgroundColor: C.teal + '15', fill: true, borderWidth: 2, pointRadius: 2, tension: 0.3 },
-    ]},
-    options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
-      plugins: { legend: { labels: { color: '#888' } } },
-      scales: { x: { grid: { color: C.grid }, ticks: { color: C.tick } }, y: { grid: { color: C.grid }, ticks: { color: C.tick, callback: v => (v/1000)+'k' } } }
+    data: { labels: years, datasets },
+    options: { responsive: true, maintainAspectRatio: false, animation: { duration: 500 },
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { position: 'bottom', labels: { color: '#888', font: { size: 10 }, boxWidth: 14 } },
+        tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y} (index, 2014=100)` } },
+        annotation: undefined,
+      },
+      scales: {
+        x: { grid: { color: C.grid }, ticks: { color: C.tick } },
+        y: { grid: { color: C.grid }, ticks: { color: C.tick, callback: v => v },
+          title: { display: true, text: 'Index (2014 = 100)', color: C.tick, font: { size: 10 } },
+        }
+      }
     }
+  });
+}
+
+function initInOutTabs() {
+  document.querySelectorAll('.inout-tabs .pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      document.querySelectorAll('.inout-tabs .pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      createChartInOut(pill.dataset.io);
+    });
   });
 }
 
