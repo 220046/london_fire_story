@@ -91,12 +91,51 @@
     <div class="ch-section">
       <h3 class="ch-subtitle">Spatial Distribution</h3>
       <p class="ch-context">Three incident types, three completely different spatial patterns. 250m grid aggregation reveals sub-borough detail invisible at coarser scales (cf. Corcoran et al., 2007).</p>
-      <div class="triple-maps">
-        <div class="map-third"><div class="map-lbl"><span class="lbl-dot dot-fire"></span> Fire Density</div><div id="map-fire" class="map-box"></div></div>
-        <div class="map-third"><div class="map-lbl"><span class="lbl-dot dot-gray"></span> False Alarm Density</div><div id="map-fa" class="map-box"></div></div>
-        <div class="map-third"><div class="map-lbl"><span class="lbl-dot dot-teal"></span> Special Service Density</div><div id="map-ss" class="map-box"></div></div>
+
+      <!-- Time slider -->
+      <div class="time-ctrl">
+        <button id="time-play" class="time-btn">Play</button>
+        <input type="range" id="time-slider" min="0" max="3" step="1" value="0">
+        <span id="time-label" class="time-label">2014-2016</span>
+        <button id="time-all" class="time-btn time-btn-sec">All Years</button>
       </div>
-      <div id="triple-hover" class="hover-info"><span class="hover-hint">Hover over a grid cell to see incident count</span></div>
+
+      <div class="triple-maps">
+        <div class="map-third">
+          <div class="map-lbl"><span class="lbl-dot dot-fire"></span> Fire Density</div>
+          <div id="map-fire" class="map-box"></div>
+          <div class="sub-pills" data-map="fire">
+            <button class="pill active" data-sub="t">All</button>
+            <button class="pill" data-sub="dw" style="--pill-c:#ff6b35">Dwelling</button>
+            <button class="pill" data-sub="od" style="--pill-c:#e76f51">Outdoor</button>
+            <button class="pill" data-sub="os" style="--pill-c:#f4a261">Structure</button>
+            <button class="pill" data-sub="rv" style="--pill-c:#ffe66d">Vehicle</button>
+          </div>
+        </div>
+        <div class="map-third">
+          <div class="map-lbl"><span class="lbl-dot dot-gray"></span> False Alarm Density</div>
+          <div id="map-fa" class="map-box"></div>
+          <div class="sub-pills" data-map="fa">
+            <button class="pill active" data-sub="t">All</button>
+            <button class="pill" data-sub="afa" style="--pill-c:#888">AFA</button>
+            <button class="pill" data-sub="gi" style="--pill-c:#aaa">Good Intent</button>
+            <button class="pill" data-sub="mal" style="--pill-c:#cc6666">Malicious</button>
+          </div>
+        </div>
+        <div class="map-third">
+          <div class="map-lbl"><span class="lbl-dot dot-teal"></span> Special Service Density</div>
+          <div id="map-ss" class="map-box"></div>
+          <div class="sub-pills" data-map="ss">
+            <button class="pill active" data-sub="t">All</button>
+            <button class="pill" data-sub="en" style="--pill-c:#457b9d">Entry</button>
+            <button class="pill" data-sub="fl" style="--pill-c:#4ecdc4">Flood</button>
+            <button class="pill" data-sub="ag" style="--pill-c:#ffe66d">Agency</button>
+            <button class="pill" data-sub="md" style="--pill-c:#cc66ff">Medical</button>
+            <button class="pill" data-sub="lr" style="--pill-c:#888">Lift</button>
+          </div>
+        </div>
+      </div>
+      <div id="triple-hover" class="hover-info"><span class="hover-hint">Hover over a grid cell. Use slider for time periods, pills for sub-categories.</span></div>
     </div>
   </section>
 

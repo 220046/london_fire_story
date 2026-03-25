@@ -98,6 +98,29 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text);
 .tp-chart { flex:1; background:var(--glass); border:1px solid var(--glass-border); border-radius:12px; padding:1.5rem; min-height:320px; position:relative; }
 .tp-chart canvas, .tp-chart svg { width:100%; height:100%; }
 
+/* TIME SLIDER */
+.time-ctrl {
+  display:flex; align-items:center; gap:1rem; margin-bottom:1rem;
+  padding:0.7rem 1rem; background:var(--glass); border:1px solid var(--glass-border); border-radius:8px;
+}
+.time-btn { padding:0.35rem 0.8rem; font-size:0.75rem; font-family:var(--font-head); background:var(--fire); color:#fff; border:none; border-radius:4px; cursor:pointer; white-space:nowrap; }
+.time-btn:hover { opacity:0.85; }
+.time-btn-sec { background:var(--glass-border); color:var(--dim); }
+.time-btn-sec.active { background:var(--teal); color:#fff; }
+#time-slider { flex:1; height:4px; -webkit-appearance:none; appearance:none; background:var(--glass-border); border-radius:2px; outline:none; }
+#time-slider::-webkit-slider-thumb { -webkit-appearance:none; width:14px; height:14px; background:var(--fire); border-radius:50%; cursor:pointer; }
+.time-label { font-family:var(--font-mono); font-size:0.8rem; color:var(--fire); min-width:80px; text-align:center; }
+
+/* SUB-CATEGORY PILLS */
+.sub-pills { display:flex; gap:0.3rem; margin-top:0.4rem; flex-wrap:wrap; justify-content:center; }
+.pill {
+  padding:0.2rem 0.5rem; font-size:0.65rem; font-family:var(--font-head);
+  background:var(--glass); border:1px solid var(--glass-border); color:var(--dim);
+  border-radius:20px; cursor:pointer; transition:all 0.2s;
+}
+.pill:hover { border-color:var(--pill-c, var(--fire)); color:var(--pill-c, var(--fire)); }
+.pill.active { background:var(--pill-c, var(--fire)); color:#000; border-color:var(--pill-c, var(--fire)); }
+
 /* TRIPLE MAP */
 .triple-maps { display:flex; gap:0.8rem; height:400px; }
 .map-third { flex:1; display:flex; flex-direction:column; }

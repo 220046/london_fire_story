@@ -218,8 +218,24 @@ function initTrajectoryTabs() {
 }
 
 // ============================================================
-// CH1: TRIPLE MAPS (fire, FA, SS grids)
+// CH1: TRIPLE MAPS with time slider + sub-category pills
 // ============================================================
+const PERIODS = [
+  { key: 'p1', label: '2014-2016' },
+  { key: 'p2', label: '2017-2019' },
+  { key: 'p3', label: '2020-2022' },
+  { key: 'p4', label: '2023-2025' },
+];
+let currentProp = { fire: 't', fa: 't', ss: 't' }; // which property each map shows
+let showAllYears = true;
+const triMaps = {};
+
+function getColorExpr(prop, maxVal) {
+  return ['interpolate', ['linear'], ['get', prop],
+    0, '#1a1a2e', maxVal * 0.15, '#2d4a3e', maxVal * 0.3, '#4ecdc4',
+    maxVal * 0.5, '#ffe66d', maxVal * 0.75, '#ff6b35', maxVal, '#ff0000'];
+}
+
 async function initTripleMaps() {
   const [boroughs, gridFire, gridFA, gridSS] = await Promise.all([
     fetch('data/london_boroughs.json').then(r => r.json()),
@@ -229,29 +245,36 @@ async function initTripleMaps() {
   ]);
 
   const cfg = { style: 'mapbox://styles/mapbox/dark-v11', center: [-0.1, 51.51], zoom: 9.2, pitch: 0, interactive: true, attributionControl: false };
-  const colorExpr = ['interpolate', ['linear'], ['get', 'd'], 0, '#1a1a2e', 15, '#2d4a3e', 30, '#4ecdc4', 50, '#ffe66d', 75, '#ff6b35', 100, '#ff0000'];
 
-  function setupMap(containerId, gridData, mapRef) {
+  function setupMap(containerId, gridData, mapKey) {
     const map = new mapboxgl.Map({ container: containerId, ...cfg });
+    triMaps[mapKey] = map;
+
     map.on('load', () => {
       map.addSource('grid', { type: 'geojson', data: gridData });
       map.addSource('boroughs', { type: 'geojson', data: boroughs });
-      map.addLayer({ id: 'grid-fill', type: 'fill', source: 'grid', paint: { 'fill-color': colorExpr, 'fill-opacity': 0.85 } });
+      map.addLayer({ id: 'grid-fill', type: 'fill', source: 'grid', paint: {
+        'fill-color': getColorExpr('d', 100), 'fill-opacity': 0.85 } });
       map.addLayer({ id: 'blines', type: 'line', source: 'boroughs', paint: { 'line-color': 'rgba(255,255,255,0.5)', 'line-width': 1.2 } });
+
       map.on('mousemove', 'grid-fill', e => {
         if (!e.features.length) return;
         map.getCanvas().style.cursor = 'pointer';
-        document.getElementById('triple-hover').innerHTML = `250m grid - Incidents: <em>${e.features[0].properties.c}</em>`;
+        const p = e.features[0].properties;
+        const prop = currentProp[mapKey];
+        const val = p[prop] || 0;
+        document.getElementById('triple-hover').innerHTML = `250m grid - ${prop === 't' ? 'Total' : prop}: <em>${val}</em> incidents`;
       });
-      map.on('mouseleave', 'grid-fill', () => { map.getCanvas().style.cursor = ''; document.getElementById('triple-hover').innerHTML = '<span class="hover-hint">Hover over a grid cell</span>'; });
+      map.on('mouseleave', 'grid-fill', () => {
+        map.getCanvas().style.cursor = '';
+        document.getElementById('triple-hover').innerHTML = '<span class="hover-hint">Hover a grid cell. Use slider/pills to filter.</span>';
+      });
     });
-    // Sync all three maps
-    return map;
   }
 
-  mapFire = setupMap('map-fire', gridFire);
-  mapFA = setupMap('map-fa', gridFA);
-  mapSS = setupMap('map-ss', gridSS);
+  setupMap('map-fire', gridFire, 'fire');
+  setupMap('map-fa', gridFA, 'fa');
+  setupMap('map-ss', gridSS, 'ss');
 
   // Sync cameras
   let syncing = false;
@@ -262,16 +285,84 @@ async function initTripleMaps() {
       syncing = false;
     });
   }
-  // Wait for all maps to load then sync
+
   setTimeout(() => {
-    if (mapFire && mapFA && mapSS) {
-      sync(mapFire, [mapFA, mapSS]);
-      sync(mapFA, [mapFire, mapSS]);
-      sync(mapSS, [mapFire, mapFA]);
-    }
-    // Resize fix
-    new IntersectionObserver(e => { e.forEach(x => { if (x.isIntersecting) { mapFire?.resize(); mapFA?.resize(); mapSS?.resize(); } }); }, { threshold: 0.1 }).observe(document.querySelector('.triple-maps'));
+    const maps = Object.values(triMaps);
+    maps.forEach((m, i) => { sync(m, maps.filter((_, j) => j !== i)); });
+    new IntersectionObserver(e => { e.forEach(x => { if (x.isIntersecting) maps.forEach(m => m.resize()); }); }, { threshold: 0.1 }).observe(document.querySelector('.triple-maps'));
   }, 2000);
+
+  // --- Time slider ---
+  const slider = document.getElementById('time-slider');
+  const label = document.getElementById('time-label');
+  const playBtn = document.getElementById('time-play');
+  const allBtn = document.getElementById('time-all');
+
+  function updateMaps() {
+    Object.entries(triMaps).forEach(([key, map]) => {
+      if (!map.getLayer('grid-fill')) return;
+      let prop;
+      if (showAllYears) {
+        prop = currentProp[key]; // sub-category or 't'
+      } else {
+        // In time mode, show period count for selected sub or total
+        const sub = currentProp[key];
+        if (sub === 't') {
+          prop = PERIODS[parseInt(slider.value)].key; // p1/p2/p3/p4
+        } else {
+          // Can't cross sub-category with time (data doesn't have that combo)
+          // Fall back to period total
+          prop = PERIODS[parseInt(slider.value)].key;
+        }
+      }
+      // Estimate max for color scaling
+      const maxEst = showAllYears ? 100 : 40;
+      map.setPaintProperty('grid-fill', 'fill-color', getColorExpr(prop, maxEst));
+    });
+  }
+
+  slider.addEventListener('input', () => {
+    showAllYears = false;
+    allBtn.classList.remove('active');
+    label.textContent = PERIODS[parseInt(slider.value)].label;
+    updateMaps();
+  });
+
+  allBtn.addEventListener('click', () => {
+    showAllYears = !showAllYears;
+    allBtn.classList.toggle('active', showAllYears);
+    label.textContent = showAllYears ? 'All Years' : PERIODS[parseInt(slider.value)].label;
+    updateMaps();
+  });
+  allBtn.classList.add('active'); // default
+
+  let playing = false, playIv = null;
+  playBtn.addEventListener('click', () => {
+    if (playing) { clearInterval(playIv); playBtn.textContent = 'Play'; playing = false; return; }
+    playing = true; playBtn.textContent = 'Pause';
+    showAllYears = false; allBtn.classList.remove('active');
+    let idx = parseInt(slider.value);
+    playIv = setInterval(() => {
+      idx = (idx + 1) % PERIODS.length;
+      slider.value = idx;
+      label.textContent = PERIODS[idx].label;
+      updateMaps();
+      if (idx === PERIODS.length - 1) { clearInterval(playIv); playBtn.textContent = 'Play'; playing = false; }
+    }, 1500);
+  });
+
+  // --- Sub-category pills ---
+  document.querySelectorAll('.sub-pills').forEach(pillGroup => {
+    const mapKey = pillGroup.dataset.map;
+    pillGroup.querySelectorAll('.pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        pillGroup.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        currentProp[mapKey] = pill.dataset.sub;
+        updateMaps();
+      });
+    });
+  });
 }
 
 // ============================================================
