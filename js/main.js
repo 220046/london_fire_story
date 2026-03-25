@@ -220,20 +220,23 @@ function initTrajectoryTabs() {
 // ============================================================
 // CH1: TRIPLE MAPS with time slider + sub-category pills
 // ============================================================
-const PERIODS = [
-  { key: 'p1', label: '2014-2016' },
-  { key: 'p2', label: '2017-2019' },
-  { key: 'p3', label: '2020-2022' },
-  { key: 'p4', label: '2023-2025' },
-];
-let currentProp = { fire: 't', fa: 't', ss: 't' }; // which property each map shows
+let currentProp = { fire: 't', fa: 't', ss: 't' };
 let showAllYears = true;
+let currentYear = 2014;
 const triMaps = {};
+const triData = {}; // store loaded geojson for max calculation
+
+function calcMax(geojson, prop) {
+  let vals = geojson.features.map(f => f.properties[prop] || 0).sort((a,b) => a-b);
+  // Use 95th percentile as max to avoid outlier-driven flat maps
+  return vals[Math.floor(vals.length * 0.95)] || 1;
+}
 
 function getColorExpr(prop, maxVal) {
+  const m = Math.max(maxVal, 1);
   return ['interpolate', ['linear'], ['get', prop],
-    0, '#1a1a2e', maxVal * 0.15, '#2d4a3e', maxVal * 0.3, '#4ecdc4',
-    maxVal * 0.5, '#ffe66d', maxVal * 0.75, '#ff6b35', maxVal, '#ff0000'];
+    0, '#1a1a2e', m * 0.1, '#2d4a3e', m * 0.25, '#4ecdc4',
+    m * 0.45, '#ffe66d', m * 0.7, '#ff6b35', m, '#ff0000'];
 }
 
 async function initTripleMaps() {
@@ -246,28 +249,34 @@ async function initTripleMaps() {
 
   const cfg = { style: 'mapbox://styles/mapbox/dark-v11', center: [-0.1, 51.51], zoom: 9.2, pitch: 0, interactive: true, attributionControl: false };
 
+  triData.fire = gridFire;
+  triData.fa = gridFA;
+  triData.ss = gridSS;
+
   function setupMap(containerId, gridData, mapKey) {
     const map = new mapboxgl.Map({ container: containerId, ...cfg });
     triMaps[mapKey] = map;
+    const initMax = calcMax(gridData, 't');
 
     map.on('load', () => {
       map.addSource('grid', { type: 'geojson', data: gridData });
       map.addSource('boroughs', { type: 'geojson', data: boroughs });
       map.addLayer({ id: 'grid-fill', type: 'fill', source: 'grid', paint: {
-        'fill-color': getColorExpr('d', 100), 'fill-opacity': 0.85 } });
+        'fill-color': getColorExpr('t', initMax), 'fill-opacity': 0.85 } });
       map.addLayer({ id: 'blines', type: 'line', source: 'boroughs', paint: { 'line-color': 'rgba(255,255,255,0.5)', 'line-width': 1.2 } });
 
       map.on('mousemove', 'grid-fill', e => {
         if (!e.features.length) return;
         map.getCanvas().style.cursor = 'pointer';
         const p = e.features[0].properties;
-        const prop = currentProp[mapKey];
-        const val = p[prop] || 0;
-        document.getElementById('triple-hover').innerHTML = `250m grid - ${prop === 't' ? 'Total' : prop}: <em>${val}</em> incidents`;
+        const activeProp = showAllYears ? currentProp[mapKey] : 'y' + currentYear;
+        const val = p[activeProp] || 0;
+        const lbl = showAllYears ? (currentProp[mapKey] === 't' ? 'All types' : currentProp[mapKey]) : currentYear;
+        document.getElementById('triple-hover').innerHTML = `250m grid [${lbl}]: <em>${val}</em> incidents (total all years: ${p.t})`;
       });
       map.on('mouseleave', 'grid-fill', () => {
         map.getCanvas().style.cursor = '';
-        document.getElementById('triple-hover').innerHTML = '<span class="hover-hint">Hover a grid cell. Use slider/pills to filter.</span>';
+        document.getElementById('triple-hover').innerHTML = '<span class="hover-hint">Hover a cell. Use slider for years, pills for sub-types.</span>';
       });
     });
   }
@@ -303,52 +312,45 @@ async function initTripleMaps() {
       if (!map.getLayer('grid-fill')) return;
       let prop;
       if (showAllYears) {
-        prop = currentProp[key]; // sub-category or 't'
+        prop = currentProp[key]; // sub-category key or 't'
       } else {
-        // In time mode, show period count for selected sub or total
-        const sub = currentProp[key];
-        if (sub === 't') {
-          prop = PERIODS[parseInt(slider.value)].key; // p1/p2/p3/p4
-        } else {
-          // Can't cross sub-category with time (data doesn't have that combo)
-          // Fall back to period total
-          prop = PERIODS[parseInt(slider.value)].key;
-        }
+        prop = 'y' + currentYear; // yearly property
       }
-      // Estimate max for color scaling
-      const maxEst = showAllYears ? 100 : 40;
-      map.setPaintProperty('grid-fill', 'fill-color', getColorExpr(prop, maxEst));
+      const mx = calcMax(triData[key], prop);
+      map.setPaintProperty('grid-fill', 'fill-color', getColorExpr(prop, mx));
     });
   }
 
   slider.addEventListener('input', () => {
     showAllYears = false;
     allBtn.classList.remove('active');
-    label.textContent = PERIODS[parseInt(slider.value)].label;
+    currentYear = parseInt(slider.value);
+    label.textContent = String(currentYear);
     updateMaps();
   });
 
   allBtn.addEventListener('click', () => {
     showAllYears = !showAllYears;
     allBtn.classList.toggle('active', showAllYears);
-    label.textContent = showAllYears ? 'All Years' : PERIODS[parseInt(slider.value)].label;
+    label.textContent = showAllYears ? 'All Years' : String(currentYear);
     updateMaps();
   });
-  allBtn.classList.add('active'); // default
+  allBtn.classList.add('active');
 
   let playing = false, playIv = null;
   playBtn.addEventListener('click', () => {
     if (playing) { clearInterval(playIv); playBtn.textContent = 'Play'; playing = false; return; }
     playing = true; playBtn.textContent = 'Pause';
     showAllYears = false; allBtn.classList.remove('active');
-    let idx = parseInt(slider.value);
+    currentYear = parseInt(slider.value);
     playIv = setInterval(() => {
-      idx = (idx + 1) % PERIODS.length;
-      slider.value = idx;
-      label.textContent = PERIODS[idx].label;
+      currentYear++;
+      if (currentYear > 2025) currentYear = 2014;
+      slider.value = currentYear;
+      label.textContent = String(currentYear);
       updateMaps();
-      if (idx === PERIODS.length - 1) { clearInterval(playIv); playBtn.textContent = 'Play'; playing = false; }
-    }, 1500);
+      if (currentYear === 2025) { clearInterval(playIv); playBtn.textContent = 'Play'; playing = false; }
+    }, 1200);
   });
 
   // --- Sub-category pills ---
