@@ -372,25 +372,62 @@ async function initTripleMaps() {
 // CH2: RESPONSE TIME MAP
 // ============================================================
 async function initResponseMap() {
-  const [boroughs, gridResp] = await Promise.all([
+  const [boroughs, gridResp, stations] = await Promise.all([
     fetch('data/london_boroughs.json').then(r => r.json()),
     fetch('data/grid_response.json').then(r => r.json()),
+    fetch('data/stations.json').then(r => r.json()),
   ]);
   mapResp = new mapboxgl.Map({ container: 'map-response', style: 'mapbox://styles/mapbox/dark-v11', center: [-0.1, 51.51], zoom: 9.2, pitch: 0, interactive: true, attributionControl: false });
   mapResp.on('load', () => {
     mapResp.addSource('grid', { type: 'geojson', data: gridResp });
     mapResp.addSource('boroughs', { type: 'geojson', data: boroughs });
+    mapResp.addSource('stations', { type: 'geojson', data: stations });
+
+    // Response time grid
     mapResp.addLayer({ id: 'grid-fill', type: 'fill', source: 'grid', paint: {
       'fill-color': ['interpolate', ['linear'], ['get', 'd'], 0, '#1a1a2e', 20, '#2d4a3e', 40, '#4ecdc4', 60, '#ffe66d', 80, '#ff6b35', 100, '#ff0000'], 'fill-opacity': 0.85 } });
+
+    // Borough boundaries
     mapResp.addLayer({ id: 'blines', type: 'line', source: 'boroughs', paint: { 'line-color': 'rgba(255,255,255,0.5)', 'line-width': 1.2 } });
     mapResp.addLayer({ id: 'blabels', type: 'symbol', source: 'boroughs', layout: { 'text-field': ['get', 'name'], 'text-size': 9, 'text-anchor': 'center' }, paint: { 'text-color': 'rgba(255,255,255,0.4)', 'text-halo-color': 'rgba(0,0,0,0.5)', 'text-halo-width': 1 } });
+
+    // Fire stations as white dots
+    mapResp.addLayer({ id: 'station-dots', type: 'circle', source: 'stations', paint: {
+      'circle-radius': ['interpolate', ['linear'], ['zoom'], 8, 2.5, 11, 5, 13, 8],
+      'circle-color': '#ffffff',
+      'circle-stroke-color': '#000000',
+      'circle-stroke-width': 1,
+      'circle-opacity': 0.9,
+    }});
+
+    // Station labels (visible at higher zoom)
+    mapResp.addLayer({ id: 'station-labels', type: 'symbol', source: 'stations',
+      layout: { 'text-field': ['get', 'name'], 'text-size': 8, 'text-anchor': 'top', 'text-offset': [0, 0.8] },
+      paint: { 'text-color': '#ffffff', 'text-halo-color': '#000000', 'text-halo-width': 1 },
+      minzoom: 11,
+    });
+
+    // Hover grid
     mapResp.on('mousemove', 'grid-fill', e => {
       if (!e.features.length) return;
       mapResp.getCanvas().style.cursor = 'pointer';
       const p = e.features[0].properties;
       document.getElementById('resp-hover').innerHTML = `250m grid - Avg response: <em>${p.r}s</em> - Incidents: ${p.c}`;
     });
-    mapResp.on('mouseleave', 'grid-fill', () => { mapResp.getCanvas().style.cursor = ''; document.getElementById('resp-hover').innerHTML = '<span class="hover-hint">Hover for response time</span>'; });
+    mapResp.on('mouseleave', 'grid-fill', () => { mapResp.getCanvas().style.cursor = ''; });
+
+    // Hover station
+    mapResp.on('mouseenter', 'station-dots', e => {
+      mapResp.getCanvas().style.cursor = 'pointer';
+      if (e.features.length) {
+        const p = e.features[0].properties;
+        document.getElementById('resp-hover').innerHTML = `Station: <strong>${p.name}</strong> - ${p.incidents.toLocaleString()} incidents served`;
+      }
+    });
+    mapResp.on('mouseleave', 'station-dots', () => {
+      mapResp.getCanvas().style.cursor = '';
+      document.getElementById('resp-hover').innerHTML = '<span class="hover-hint">Hover grid for response time, white dots = fire stations</span>';
+    });
   });
   new IntersectionObserver(e => { e.forEach(x => { if (x.isIntersecting) mapResp?.resize(); }); }, { threshold: 0.1 }).observe(document.getElementById('map-response'));
 }
