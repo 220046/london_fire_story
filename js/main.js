@@ -379,65 +379,53 @@ async function initResponseMap() {
   ]);
   mapResp = new mapboxgl.Map({ container: 'map-response', style: 'mapbox://styles/mapbox/dark-v11', center: [-0.1, 51.51], zoom: 9.2, pitch: 0, interactive: true, attributionControl: false });
   mapResp.on('load', () => {
-    // Convert grid polygons to center points for heatmap
-    const pts = { type: 'FeatureCollection', features: gridResp.features.map(f => {
-      const c = f.geometry.coordinates[0];
-      const lng = (c[0][0] + c[2][0]) / 2, lat = (c[0][1] + c[2][1]) / 2;
-      return { type: 'Feature', geometry: { type: 'Point', coordinates: [lng, lat] }, properties: f.properties };
-    })};
-
-    mapResp.addSource('resp-pts', { type: 'geojson', data: pts });
+    mapResp.addSource('grid', { type: 'geojson', data: gridResp });
     mapResp.addSource('boroughs', { type: 'geojson', data: boroughs });
     mapResp.addSource('stations', { type: 'geojson', data: stations });
 
-    // Smooth heatmap layer - weight by response time density index
-    mapResp.addLayer({ id: 'resp-heat', type: 'heatmap', source: 'resp-pts', paint: {
-      'heatmap-weight': ['interpolate', ['linear'], ['get', 'd'], 0, 0, 50, 0.5, 100, 1],
-      'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 8, 0.5, 12, 1.5],
-      'heatmap-color': ['interpolate', ['linear'], ['heatmap-density'],
-        0, 'rgba(0,0,0,0)',
-        0.1, '#1a1a2e',
-        0.25, '#2d4a3e',
-        0.4, '#4ecdc4',
-        0.55, '#ffe66d',
-        0.75, '#ff6b35',
-        1, '#ff0000'],
-      'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 8, 12, 10, 20, 12, 30],
-      'heatmap-opacity': 0.85,
-    }});
+    // Response time grid
+    mapResp.addLayer({ id: 'grid-fill', type: 'fill', source: 'grid', paint: {
+      'fill-color': ['interpolate', ['linear'], ['get', 'd'], 0, '#1a1a2e', 20, '#2d4a3e', 40, '#4ecdc4', 60, '#ffe66d', 80, '#ff6b35', 100, '#ff0000'], 'fill-opacity': 0.85 } });
 
     // Borough boundaries
     mapResp.addLayer({ id: 'blines', type: 'line', source: 'boroughs', paint: { 'line-color': 'rgba(255,255,255,0.5)', 'line-width': 1.2 } });
     mapResp.addLayer({ id: 'blabels', type: 'symbol', source: 'boroughs', layout: { 'text-field': ['get', 'name'], 'text-size': 9, 'text-anchor': 'center' }, paint: { 'text-color': 'rgba(255,255,255,0.4)', 'text-halo-color': 'rgba(0,0,0,0.5)', 'text-halo-width': 1 } });
 
-    // Fire stations as white dots
+    // Fire stations - small subtle cross markers, hidden by default
     mapResp.addLayer({ id: 'station-dots', type: 'circle', source: 'stations', paint: {
-      'circle-radius': ['interpolate', ['linear'], ['zoom'], 8, 2.5, 11, 5, 13, 8],
-      'circle-color': '#ffffff',
-      'circle-stroke-color': '#000000',
-      'circle-stroke-width': 1,
-      'circle-opacity': 0.9,
-    }});
+      'circle-radius': ['interpolate', ['linear'], ['zoom'], 8, 2, 11, 3.5, 13, 5],
+      'circle-color': 'transparent',
+      'circle-stroke-color': '#ffffff',
+      'circle-stroke-width': ['interpolate', ['linear'], ['zoom'], 8, 1, 12, 1.5],
+      'circle-opacity': 0,
+    }, layout: { 'visibility': 'none' }});
 
-    // Station labels (visible at higher zoom)
     mapResp.addLayer({ id: 'station-labels', type: 'symbol', source: 'stations',
-      layout: { 'text-field': ['get', 'name'], 'text-size': 8, 'text-anchor': 'top', 'text-offset': [0, 0.8] },
-      paint: { 'text-color': '#ffffff', 'text-halo-color': '#000000', 'text-halo-width': 1 },
+      layout: { 'text-field': ['get', 'name'], 'text-size': 8, 'text-anchor': 'top', 'text-offset': [0, 0.6], 'visibility': 'none' },
+      paint: { 'text-color': 'rgba(255,255,255,0.8)', 'text-halo-color': 'rgba(0,0,0,0.8)', 'text-halo-width': 1 },
       minzoom: 11,
     });
 
-    // Add invisible circle layer for hover on points
-    mapResp.addLayer({ id: 'resp-hover-dots', type: 'circle', source: 'resp-pts', paint: {
-      'circle-radius': ['interpolate', ['linear'], ['zoom'], 8, 4, 12, 10],
-      'circle-color': 'transparent', 'circle-opacity': 0 } });
+    // Toggle button logic
+    document.getElementById('station-toggle')?.addEventListener('click', function() {
+      const vis = mapResp.getLayoutProperty('station-dots', 'visibility');
+      const show = vis === 'none';
+      mapResp.setLayoutProperty('station-dots', 'visibility', show ? 'visible' : 'none');
+      mapResp.setLayoutProperty('station-labels', 'visibility', show ? 'visible' : 'none');
+      if (show) {
+        mapResp.setPaintProperty('station-dots', 'circle-opacity', 0.8);
+      }
+      this.classList.toggle('active', show);
+    });
 
-    mapResp.on('mousemove', 'resp-hover-dots', e => {
+    // Hover grid
+    mapResp.on('mousemove', 'grid-fill', e => {
       if (!e.features.length) return;
       mapResp.getCanvas().style.cursor = 'pointer';
       const p = e.features[0].properties;
-      document.getElementById('resp-hover').innerHTML = `Avg response: <em>${p.r}s</em> - Incidents: ${p.c}`;
+      document.getElementById('resp-hover').innerHTML = `250m grid - Avg response: <em>${p.r}s</em> - Incidents: ${p.c}`;
     });
-    mapResp.on('mouseleave', 'resp-hover-dots', () => { mapResp.getCanvas().style.cursor = ''; });
+    mapResp.on('mouseleave', 'grid-fill', () => { mapResp.getCanvas().style.cursor = ''; });
 
     // Hover station
     mapResp.on('mouseenter', 'station-dots', e => {
