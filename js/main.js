@@ -264,7 +264,7 @@ async function initTripleMaps() {
         const activeProp = showAllYears ? currentProp[mapKey] : 'y' + currentYear;
         const val = p[activeProp] || 0;
         const lbl = showAllYears ? (currentProp[mapKey] === 't' ? 'All types' : currentProp[mapKey]) : currentYear;
-        document.getElementById('triple-hover').innerHTML = `250m grid [${lbl}]: <em>${val}</em> incidents — total all years: ${p.t}`;
+        document.getElementById('triple-hover').innerHTML = `250m grid [${lbl}]: <em>${val}</em> incidents (total across all years: ${p.t})`;
       });
       map.on('mouseleave', 'grid-fill', () => {
         map.getCanvas().style.cursor = '';
@@ -398,7 +398,7 @@ async function initResponseMap() {
       if (!e.features.length) return;
       mapResp.getCanvas().style.cursor = 'pointer';
       const p = e.features[0].properties;
-      document.getElementById('resp-hover').innerHTML = `250m grid — avg response <em>${p.r}s</em> across ${p.c} incidents`;
+      document.getElementById('resp-hover').innerHTML = `250m grid: avg response <em>${p.r}s</em> across ${p.c} incidents`;
     });
     mapResp.on('mouseleave', 'grid-fill', () => { mapResp.getCanvas().style.cursor = ''; });
 
@@ -406,7 +406,7 @@ async function initResponseMap() {
       mapResp.getCanvas().style.cursor = 'pointer';
       if (e.features.length) {
         const p = e.features[0].properties;
-        document.getElementById('resp-hover').innerHTML = `Station: <strong>${p.name}</strong> — ${p.incidents.toLocaleString()} incidents served`;
+        document.getElementById('resp-hover').innerHTML = `Station: <strong>${p.name}</strong>, ${p.incidents.toLocaleString()} incidents served`;
       }
     });
     mapResp.on('mouseleave', 'station-dots', () => {
@@ -438,7 +438,7 @@ function initScatterPlot() {
 
   svg.append('g').attr('transform', `translate(0,${H-M.bottom})`).call(d3.axisBottom(x).ticks(6).tickFormat(d => d + '%')).call(g => { g.selectAll('text').attr('fill', C.tick); g.select('.domain').attr('stroke', C.grid); });
   svg.append('g').attr('transform', `translate(${M.left},0)`).call(d3.axisLeft(y).ticks(6)).call(g => { g.selectAll('text').attr('fill', C.tick); g.select('.domain').attr('stroke', C.grid); });
-  svg.append('text').attr('x', W / 2).attr('y', H - 8).attr('fill', C.tick).attr('text-anchor', 'middle').attr('font-size', '11px').text('Special Service Growth Rate 2014–2025 (%)');
+  svg.append('text').attr('x', W / 2).attr('y', H - 8).attr('fill', C.tick).attr('text-anchor', 'middle').attr('font-size', '11px').text('Special Service Growth Rate 2014 to 2025 (%)');
   svg.append('text').attr('transform', 'rotate(-90)').attr('x', -H / 2).attr('y', 14).attr('fill', C.tick).attr('text-anchor', 'middle').attr('font-size', '11px').text('Avg First Pump Attendance (seconds)');
 
   const dzGrowth = 80, dzRespHi = yMax, dzRespLo = 320;

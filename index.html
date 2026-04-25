@@ -52,7 +52,7 @@
     <div class="ch-section">
       <h3 class="ch-subtitle">The Structural Shift</h3>
       <div class="kpi-row" id="kpi-ch1">
-        <div class="kpi-card"><span class="kpi-val" data-to="1340000" data-suf="">0</span><span class="kpi-lbl">Calls (2014–2025)</span></div>
+        <div class="kpi-card"><span class="kpi-val" data-to="1340000" data-suf="">0</span><span class="kpi-lbl">Calls (2014 to 2025)</span></div>
         <div class="kpi-card"><span class="kpi-val" data-to="14" data-suf="%">0</span><span class="kpi-lbl">Are Fires (2025)</span></div>
         <div class="kpi-card"><span class="kpi-val" data-to="41" data-suf="%">0</span><span class="kpi-lbl">Special Service</span></div>
         <div class="kpi-card"><span class="kpi-val" data-to="45" data-suf="%">0</span><span class="kpi-lbl">False Alarm</span></div>
@@ -85,7 +85,7 @@
 
     <div class="ch-section">
       <h3 class="ch-subtitle">Spatial Distribution</h3>
-      <p class="ch-context">Three incident types, three completely different spatial patterns. 250m grid aggregation reveals sub-borough detail invisible at coarser scales (cf. Corcoran et al., 2007).</p>
+      <p class="ch-context">Three incident types, three completely different spatial patterns. 250m grid aggregation reveals sub-borough detail invisible at coarser scales.</p>
 
       <div class="time-ctrl">
         <button id="time-play" class="time-btn">Play</button>
@@ -137,7 +137,7 @@
 
   <section id="ch2" class="chapter">
     <div class="chapter-header"><span class="ch-num">02</span><h2>Who Waits the Longest</h2></div>
-    <p class="ch-context">Following the UNDRR Sendai Framework, risk is shaped by both hazard and vulnerability. The 250m grid reveals where incidents concentrate; response time reveals how quickly help arrives (Jennings, 2013; Chhetri et al., 2010).</p>
+    <p class="ch-context">Risk is shaped by both hazard and vulnerability. The 250m grid reveals where incidents concentrate; response time reveals how quickly help arrives.</p>
 
     <div class="ch-section">
       <h3 class="ch-subtitle">Response Time Across London</h3>
@@ -181,7 +181,7 @@
           <p>The poorest quarter of wards has <strong class="big-n">64%</strong> higher fire rates than the richest.</p>
           <p>Yet deprived wards get <em>faster</em> responses, because they sit in inner London where stations are densest. The inequality is not in who gets rescued, but in who needs rescuing.</p>
           <p class="stat-note">Pearson r = 0.251, p ≈ 1.2×10⁻⁸, 501 wards</p>
-          <p class="stat-cite">IMD 2019 (MHCLG) × LFB ward-level fire incidents (2018–2023 subset, matching the post-revision ONS ward codes).</p>
+          <p class="stat-cite">IMD 2019 (MHCLG) × LFB ward-level fire incidents (2018 to 2023 subset, matching the post-revision ONS ward codes).</p>
         </div>
       </div>
     </div>
@@ -217,16 +217,16 @@
     <div class="ch5-body">
       <h2 class="conclusion-title">Reading the City</h2>
       <p class="conclusion-lead">London Fire Brigade answers over <strong>100,000</strong> calls a year. Fewer than 1 in 7 are actual fires.</p>
-      <p class="conclusion-text">The rest — floods, forced entries, agency assists — are signals of a city ageing, warming, and stretching its safety nets. Since the 2014 station closures, new demand has shifted outward to where response is slowest, and seasonal peaks in July and December stack incident types on top of one another.</p>
+      <p class="conclusion-text">The rest, floods, forced entries, agency assists, are signals of a city ageing, warming, and stretching its safety nets. Since the 2014 station closures, new demand has shifted outward to where response is slowest, and seasonal peaks in July and December stack incident types on top of one another.</p>
       <p class="conclusion-text">Urban Analytics lets us read these signals and ask: <em>is the system resilient enough for the city London is becoming?</em></p>
 
       <div class="methodology">
         <h4>Methodology</h4>
-        <p>Analysis of roughly 1.34 million LFB incident records (2014–2025) from the <a href="https://data.london.gov.uk/" target="_blank">London Datastore</a> (OGL v2). Spatial analysis uses 250m grid aggregation with pyproj BNG-to-WGS84 coordinate transformation. The deprivation–fire correlation is computed on the 2018–2023 subset because ward boundaries were redrawn in 2014, and the 2018–2023 file uses the post-revision ONS ward codes that match IMD 2019. Correlations use Pearson's r on ward-level fire rates per 1,000 population, joined to IMD 2019 (MHCLG) via ward code with name-based fallback. Ward-level IMD scores should be read as 2019 estimates rather than current values.</p>
+        <p>Analysis of roughly 1.34 million LFB incident records (2014 to 2025) from the <a href="https://data.london.gov.uk/" target="_blank">London Datastore</a> (OGL v2). Spatial analysis uses 250m grid aggregation with pyproj BNG-to-WGS84 coordinate transformation. The deprivation and fire correlation is computed on the 2018 to 2023 subset because ward boundaries were redrawn in 2014, and the 2018 to 2023 file uses the post-revision ONS ward codes that match IMD 2019. Correlations use Pearson's r on ward-level fire rates per 1,000 population, joined to IMD 2019 (MHCLG) via ward code with name-based fallback. Ward-level IMD scores should be read as 2019 estimates rather than current values.</p>
         <h4>AI tools used</h4>
         <p>Claude (Anthropic) and ChatGPT (OpenAI) were used to scaffold the scrollytelling structure, draft initial Chart.js / D3 / Mapbox boilerplate, and review code for bugs. The data preparation scripts (<code>prepare_data.py</code>, <code>prepare_grids_v3.py</code>, <code>imd_analysis.py</code>) were drafted with AI assistance and reviewed by the team. All analytical claims in the text (Pearson r, quartile gaps, growth rates, monthly peaks, borough totals) were computed directly from LFB data and cross-checked against the source files.</p>
       </div>
-      <div class="credits"><p>CASA0029 Urban Data Visualisation · UCL 2025–26</p></div>
+      <div class="credits"><p>CASA0029 Urban Data Visualisation · UCL 2025/26</p></div>
     </div>
   </section>
 
