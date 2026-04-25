@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>London's Emergency Pulse</title>
+  <title>The Fire Service That Barely Fights Fires</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext y='26' font-size='28'%3E%F0%9F%94%A5%3C/text%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
   <link href="https://api.mapbox.com/mapbox-gl-js/v3.17.0/mapbox-gl.css" rel="stylesheet" />
@@ -34,7 +35,7 @@
         <span class="title-line" id="title-line1"></span>
         <span class="title-line" id="title-line2"></span>
       </h1>
-      <p class="hero-tagline" id="hero-tagline">In 2014, London closed 10 fire stations and cut 552 firefighter posts. 1.1 million emergency calls later, what has changed?</p>
+      <p class="hero-tagline" id="hero-tagline">In 2014, London closed 10 fire stations and cut 552 firefighter posts. 1.3 million emergency calls later, what has changed?</p>
       <div class="scroll-cue">
         <span>Scroll to begin</span>
         <div class="scroll-arrow"></div>
@@ -42,20 +43,16 @@
     </div>
   </section>
 
-  <!-- ============================================ -->
-  <!-- CH1: What They Respond To -->
-  <!-- ============================================ -->
   <div class="bridge"><p class="bridge-text">Fewer than <strong>1 in 7</strong> calls is a real fire.<br><span class="bridge-q">So what are the other 6?</span></p></div>
 
   <section id="ch1" class="chapter">
     <div class="chapter-header"><span class="ch-num">01</span><h2>What They Respond To</h2></div>
-    <p class="ch-context">London Fire Brigade answers over 100,000 calls a year. The composition of those calls has fundamentally shifted since 2014 - fires are declining, but new demands are surging. This chapter maps what, where, and how much.</p>
+    <p class="ch-context">London Fire Brigade answers over 100,000 calls a year. The composition of those calls has fundamentally shifted since 2014: fires are declining while new demands surge. This chapter maps what, where, and how much.</p>
 
-    <!-- 1a: Composition trend -->
     <div class="ch-section">
       <h3 class="ch-subtitle">The Structural Shift</h3>
       <div class="kpi-row" id="kpi-ch1">
-        <div class="kpi-card"><span class="kpi-val" data-to="1100000" data-suf="">0</span><span class="kpi-lbl">Calls (2014-2025)</span></div>
+        <div class="kpi-card"><span class="kpi-val" data-to="1340000" data-suf="">0</span><span class="kpi-lbl">Calls (2014–2025)</span></div>
         <div class="kpi-card"><span class="kpi-val" data-to="14" data-suf="%">0</span><span class="kpi-lbl">Are Fires (2025)</span></div>
         <div class="kpi-card"><span class="kpi-val" data-to="41" data-suf="%">0</span><span class="kpi-lbl">Special Service</span></div>
         <div class="kpi-card"><span class="kpi-val" data-to="45" data-suf="%">0</span><span class="kpi-lbl">False Alarm</span></div>
@@ -63,7 +60,6 @@
       <div class="chart-box chart-wide"><canvas id="chart-yearly"></canvas></div>
     </div>
 
-    <!-- 1b: Three types breakdown (tabs) -->
     <div class="ch-section">
       <h3 class="ch-subtitle">Three Trajectories</h3>
       <div class="traj-tabs">
@@ -81,18 +77,16 @@
           <div class="tp-chart"><canvas id="chart-fire-prop"></canvas></div>
         </div>
         <div class="traj-panel" id="tp-ss">
-          <div class="tp-text"><h4>The Rise</h4><p>Special service now accounts for 41% of all calls. Forced entries +86%, agency assists +433%. The fire brigade is becoming a multi-purpose emergency service.</p></div>
+          <div class="tp-text"><h4>The Rise</h4><p>Special service now accounts for 41% of all calls. Since 2014, forced entries have grown <strong>+127%</strong> and agency assists are nearly <strong>10× higher</strong> (560 in 2014, 5,427 in 2025). The brigade increasingly handles incidents that are not fires at all.</p></div>
           <div class="tp-chart"><svg id="slope-chart"></svg></div>
         </div>
       </div>
     </div>
 
-    <!-- 1c: Spatial distribution - triple grid map -->
     <div class="ch-section">
       <h3 class="ch-subtitle">Spatial Distribution</h3>
       <p class="ch-context">Three incident types, three completely different spatial patterns. 250m grid aggregation reveals sub-borough detail invisible at coarser scales (cf. Corcoran et al., 2007).</p>
 
-      <!-- Time slider -->
       <div class="time-ctrl">
         <button id="time-play" class="time-btn">Play</button>
         <input type="range" id="time-slider" min="2014" max="2025" step="1" value="2014">
@@ -135,20 +129,16 @@
           </div>
         </div>
       </div>
-      <div id="triple-hover" class="hover-info"><span class="hover-hint">Hover over a grid cell. Use slider for time periods, pills for sub-categories.</span></div>
+      <div id="triple-hover" class="hover-info"><span class="hover-hint">Hover over a grid cell. Use the slider for time periods and the pills for sub-categories.</span></div>
     </div>
   </section>
 
-  <!-- ============================================ -->
-  <!-- CH2: Who Waits the Longest -->
-  <!-- ============================================ -->
   <div class="bridge"><p class="bridge-text">Different places, different risks, different waits.<br><span class="bridge-q">Is the system keeping up?</span></p></div>
 
   <section id="ch2" class="chapter">
     <div class="chapter-header"><span class="ch-num">02</span><h2>Who Waits the Longest</h2></div>
     <p class="ch-context">Following the UNDRR Sendai Framework, risk is shaped by both hazard and vulnerability. The 250m grid reveals where incidents concentrate; response time reveals how quickly help arrives (Jennings, 2013; Chhetri et al., 2010).</p>
 
-    <!-- 2a: Response time map -->
     <div class="ch-section">
       <h3 class="ch-subtitle">Response Time Across London</h3>
       <div class="single-map-wrap">
@@ -156,19 +146,17 @@
         <div id="map-response" class="map-box map-large"></div>
         <div class="map-ctrl-row">
           <div id="resp-hover" class="hover-info" style="flex:1"><span class="hover-hint">Hover grid for response time</span></div>
-          <button id="station-toggle" class="pill" style="--pill-c:#ffffff; white-space:nowrap;">Show 102 Fire Stations</button>
+          <button id="station-toggle" class="pill" style="--pill-c:#ffffff; white-space:nowrap;">Show Fire Stations</button>
         </div>
       </div>
     </div>
 
-    <!-- 2b: Scatter plot - SS growth vs response time -->
     <div class="ch-section">
       <h3 class="ch-subtitle">The Danger Zone</h3>
       <p class="ch-context">Boroughs where special service demand is growing fastest are often those where the fire service takes longest to arrive.</p>
       <div class="chart-box chart-scatter"><svg id="scatter-plot"></svg></div>
     </div>
 
-    <!-- 2c: Inner vs Outer trend -->
     <div class="ch-section">
       <h3 class="ch-subtitle">The Outward Shift</h3>
       <p class="ch-context">Across all three incident types, outer London is growing faster than inner London. The indexed chart below (2014 = 100) makes the divergence clear.</p>
@@ -180,83 +168,65 @@
       </div>
       <div class="chart-box chart-wide"><canvas id="chart-inout"></canvas></div>
       <div class="split-text" style="margin-top:1rem; text-align:center;">
-        <p>Fire: Inner <strong>-6.9%</strong> vs Outer <strong>+6.7%</strong>. False Alarm: Inner +26% vs Outer <strong>+35%</strong>. Special Service: Inner +89% vs Outer <strong>+104%</strong>.</p>
-        <p>The fire service was built for a centralised city. London's emergency demand is decentralising - but the stations haven't moved.</p>
+        <p>Fire: Inner <strong>−6.9%</strong> vs Outer <strong>+6.7%</strong>. False Alarm: Inner +26% vs Outer <strong>+35%</strong>. Special Service: Inner +89% vs Outer <strong>+104%</strong>.</p>
+        <p>Outer boroughs are absorbing the bulk of the new demand, yet station coverage there has barely changed since 2014.</p>
       </div>
     </div>
 
-    <!-- 2d: IMD quartile -->
     <div class="ch-section">
       <h3 class="ch-subtitle">Deprivation and Fire Risk</h3>
       <div class="split-row">
         <div class="chart-box split-chart"><canvas id="chart-quartile"></canvas></div>
         <div class="split-text">
           <p>The poorest quarter of wards has <strong class="big-n">64%</strong> higher fire rates than the richest.</p>
-          <p>Yet deprived areas get <em>faster</em> responses - because they sit in inner London where stations are densest. The inequality is not in who gets rescued, but in who needs rescuing.</p>
-          <p class="stat-note">Pearson r = 0.25, p < 0.001 across 501 wards</p>
-          <p class="stat-cite">IMD 2019 (MHCLG) x LFB Incidents 2014-2025</p>
+          <p>Yet deprived wards get <em>faster</em> responses, because they sit in inner London where stations are densest. The inequality is not in who gets rescued, but in who needs rescuing.</p>
+          <p class="stat-note">Pearson r = 0.251, p ≈ 1.2×10⁻⁸, 501 wards</p>
+          <p class="stat-cite">IMD 2019 (MHCLG) × LFB ward-level fire incidents (2018–2023 subset, matching the post-revision ONS ward codes).</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ============================================ -->
-  <!-- CH3: When Emergencies Strike -->
-  <!-- ============================================ -->
   <div class="bridge"><p class="bridge-text">Different emergencies follow<br><strong>completely different seasonal clocks</strong>.</p></div>
 
   <section id="ch3" class="chapter">
     <div class="chapter-header"><span class="ch-num">03</span><h2>When Emergencies Strike</h2></div>
-    <p class="ch-context">Fire services typically plan for a flat demand curve. But the data reveals multiple overlapping seasonal peaks - a temporal collision that challenges resource planning.</p>
+    <p class="ch-context">Fire services typically plan for a flat demand curve, but the monthly data reveals overlapping seasonal peaks across incident types. Scroll through each one to see when its calls cluster.</p>
 
-    <!-- 3a: All types overlay -->
     <div class="ch-section">
       <h3 class="ch-subtitle">The Seasonal Landscape</h3>
       <div class="chart-box chart-wide"><canvas id="chart-monthly-all"></canvas></div>
     </div>
 
-    <!-- 3b: Individual breakdowns (scrollytelling) -->
     <div class="scrolly" id="scrolly-ch3">
       <div class="scrolly-graphic">
         <canvas id="chart-monthly-focus"></canvas>
       </div>
       <div class="scrolly-steps">
-        <div class="step" data-step="outdoor"><div class="step-card sc-fire"><h3>Outdoor Fire</h3><p>Peaks in July at nearly <strong>4x</strong> winter levels. Dry weather and vegetation drive a dramatic summer surge.</p></div></div>
-        <div class="step" data-step="dwelling"><div class="step-card sc-fire"><h3>Dwelling Fire</h3><p>Remarkably flat across the year. No clear seasonal pattern - residential fires are a constant, year-round risk.</p></div></div>
-        <div class="step" data-step="flooding"><div class="step-card sc-teal"><h3>Flooding</h3><p>Summer storms drive a July-August spike - coinciding with the outdoor fire peak. Two crises competing for the same resources.</p></div></div>
-        <div class="step" data-step="entry"><div class="step-card sc-teal"><h3>Forced Entry</h3><p>Does it peak in winter, when the elderly are most vulnerable to falls and isolation? Or is it flat like dwelling fires?</p></div></div>
-        <div class="step" data-step="assist"><div class="step-card sc-yellow"><h3>Agency Assist</h3><p>When do other services call the fire brigade for help? The seasonal pattern reveals the rhythm of inter-agency demand.</p></div></div>
-        <div class="step" data-step="collision"><div class="step-card sc-contrast"><h3>The Temporal Collision</h3><p>July demands surge capacity for outdoor fires AND flooding simultaneously - while forced entries and agency assists maintain baseline pressure. Resource planning must account for these overlapping peaks.</p></div></div>
+        <div class="step" data-step="outdoor"><div class="step-card sc-fire"><h3>Outdoor Fire</h3><p>Peaks in July at <strong>9,366</strong> incidents, over <strong>4×</strong> the December low of 2,112. Dry weather and vegetation drive the summer surge.</p></div></div>
+        <div class="step" data-step="dwelling"><div class="step-card sc-fire"><h3>Dwelling Fire</h3><p>Remarkably flat across the year, varying only between 4,800 and 5,500 per month. Residential fires are a constant, year-round risk.</p></div></div>
+        <div class="step" data-step="flooding"><div class="step-card sc-teal"><h3>Flooding</h3><p>Bimodal: a winter peak in December (8,598) and a smaller summer peak in July (8,440). Storm seasons at both ends of the year overlap with the outdoor fire surge.</p></div></div>
+        <div class="step" data-step="entry"><div class="step-card sc-teal"><h3>Forced Entry</h3><p>Highest in December (9,774), with a secondary summer peak (9,721 in July). The amplitude is modest, around 30% between low and high months.</p></div></div>
+        <div class="step" data-step="assist"><div class="step-card sc-yellow"><h3>Agency Assist</h3><p>After a February dip, the trend rises through the year and peaks in December at <strong>2,503</strong>, 41% above the February low. Inter-agency demand concentrates in winter.</p></div></div>
+        <div class="step" data-step="collision"><div class="step-card sc-contrast"><h3>The Temporal Collision</h3><p>July stacks an outdoor fire surge on top of summer flooding while forced entries stay near their annual peak. December delivers the same pile-up: flooding, forced entries, and agency assists all peak together. A flat staffing model has no slack for either month.</p></div></div>
       </div>
     </div>
   </section>
 
-  <!-- ============================================ -->
-  <!-- CONCLUSION -->
-  <!-- ============================================ -->
   <section id="conclusion" class="chapter ch5-section">
     <div class="ch5-body">
       <h2 class="conclusion-title">Reading the City</h2>
       <p class="conclusion-lead">London Fire Brigade answers over <strong>100,000</strong> calls a year. Fewer than 1 in 7 are actual fires.</p>
-      <p class="conclusion-text">The rest - floods, forced entries, agency assists - are signals of a city ageing, warming, and stretching its safety nets. Since the 2014 station closures, new demand has shifted outward to where response is slowest, and seasonal peaks create resource collisions that a flat staffing model cannot absorb.</p>
+      <p class="conclusion-text">The rest — floods, forced entries, agency assists — are signals of a city ageing, warming, and stretching its safety nets. Since the 2014 station closures, new demand has shifted outward to where response is slowest, and seasonal peaks in July and December stack incident types on top of one another.</p>
       <p class="conclusion-text">Urban Analytics lets us read these signals and ask: <em>is the system resilient enough for the city London is becoming?</em></p>
 
       <div class="methodology">
         <h4>Methodology</h4>
-        <p>Analysis of 1.1M+ LFB incident records (2014-2025) from <a href="https://data.london.gov.uk/" target="_blank">London Datastore</a> (OGL v2). Spatial analysis uses 250m grid aggregation with pyproj BNG-to-WGS84 coordinate transformation. Ward-level IMD 2019 from MHCLG. Statistical correlations via Pearson test. IMD 2019 is used as the deprivation measure; while deprivation patterns shift over time, the broad spatial structure of London's inequality has remained relatively stable over the study period.</p>
-        <h4>References</h4>
-        <ul>
-          <li>UNDRR (2015) Sendai Framework for Disaster Risk Reduction 2015-2030.</li>
-          <li>Meerow, S. et al. (2016) Defining urban resilience. Landscape & Urban Planning, 147.</li>
-          <li>Jennings, C.R. (2013) Social and economic characteristics as determinants of residential fire risk. Fire Safety J., 62.</li>
-          <li>Chhetri, P. et al. (2010) Modelling spatial patterns of residential fire incidence. Fire Safety J., 45(3).</li>
-          <li>Corcoran, J. et al. (2007) Spatial analytical techniques to explore patterns of fire incidence. Computers, Environment and Urban Systems, 31(6).</li>
-          <li>Qin, X. et al. (2025) Enhancing urban resilience through ML-supported flood risk assessment. npj Urban Sustainability, 5:19.</li>
-          <li>Taylor, A. (2016) London's burning: Impact of 2014 station closures.</li>
-          <li>London Fire Brigade Community Risk Management Plan; Annual Reports 2014-2025.</li>
-        </ul>
+        <p>Analysis of roughly 1.34 million LFB incident records (2014–2025) from the <a href="https://data.london.gov.uk/" target="_blank">London Datastore</a> (OGL v2). Spatial analysis uses 250m grid aggregation with pyproj BNG-to-WGS84 coordinate transformation. The deprivation–fire correlation is computed on the 2018–2023 subset because ward boundaries were redrawn in 2014, and the 2018–2023 file uses the post-revision ONS ward codes that match IMD 2019. Correlations use Pearson's r on ward-level fire rates per 1,000 population, joined to IMD 2019 (MHCLG) via ward code with name-based fallback. Ward-level IMD scores should be read as 2019 estimates rather than current values.</p>
+        <h4>AI tools used</h4>
+        <p>Claude (Anthropic) and ChatGPT (OpenAI) were used to scaffold the scrollytelling structure, draft initial Chart.js / D3 / Mapbox boilerplate, and review code for bugs. The data preparation scripts (<code>prepare_data.py</code>, <code>prepare_grids_v3.py</code>, <code>imd_analysis.py</code>) were drafted with AI assistance and reviewed by the team. All analytical claims in the text (Pearson r, quartile gaps, growth rates, monthly peaks, borough totals) were computed directly from LFB data and cross-checked against the source files.</p>
       </div>
-      <div class="credits"><p>CASA0029 Urban Data Visualisation - UCL 2025-26</p></div>
+      <div class="credits"><p>CASA0029 Urban Data Visualisation · UCL 2025–26</p></div>
     </div>
   </section>
 
