@@ -28,8 +28,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   initTripleMaps();
   initResponseMap();
+  createChartResponseRanking();
   initScatterPlot();
+  createChartDualPanel();
+  createBivariateMap();
   initScrollytelling();
+
+  initCursorGlow();   // ← 新增第一行（在这里加）
+  initCardTilt();     // ← 新增第二行（在这里加）
+  initBridgeParticles(); // ← 新增第三行（在这里加）
 });
 
 // Hero typewriter + ember particles
@@ -63,11 +70,13 @@ function initHero() {
   })();
 }
 
+// 打字机效果函数
 function typewrite(el, text, speed, cb) {
   let i = 0;
   const iv = setInterval(() => { el.textContent += text[i]; i++; if (i >= text.length) { clearInterval(iv); if (cb) setTimeout(cb, 200); } }, speed);
 }
 
+// 顶部导航栏：滚动隐藏 + 章节高亮
 function initNav() {
   const nav = document.getElementById('nav');
   const hero = document.getElementById('hero');
@@ -82,11 +91,13 @@ function initNav() {
   chapters.forEach(ch => new IntersectionObserver(e => { e.forEach(x => { if (x.isIntersecting) { links.forEach(l => l.classList.remove('active')); document.querySelector(`[data-target="${x.target.id}"]`)?.classList.add('active'); } }); }, { threshold: 0.2 }).observe(ch));
 }
 
+// 阅读进度条
 function initProgressBar() {
   const bar = document.getElementById('progress-bar');
   window.addEventListener('scroll', () => { bar.style.width = (window.scrollY / (document.body.scrollHeight - window.innerHeight) * 100) + '%'; });
 }
 
+// GSAP滚动触发入场动画
 function initRevealAnimations() {
   gsap.registerPlugin(ScrollTrigger);
   gsap.utils.toArray('.bridge-text').forEach(el => { gsap.from(el, { scrollTrigger: { trigger: el, start: 'top 80%' }, opacity: 0, y: 50, duration: 1 }); });
@@ -95,6 +106,7 @@ function initRevealAnimations() {
   gsap.utils.toArray('.chart-box, .tp-chart, .triple-maps, .single-map-wrap, .chart-scatter').forEach(el => { gsap.from(el, { scrollTrigger: { trigger: el, start: 'top 85%' }, opacity: 0, y: 30, duration: 0.8 }); });
 }
 
+// KPI数字卡片：滚动进入视口时触发数字滚动计数动画
 function initKPICounters() {
   document.querySelectorAll('.kpi-val').forEach(el => {
     const target = parseInt(el.dataset.to), suffix = el.dataset.suf || '', prefix = el.dataset.pre || '';
@@ -102,6 +114,9 @@ function initKPICounters() {
     new IntersectionObserver(e => { e.forEach(x => { if (x.isIntersecting && !started) { started = true; animateCounter(el, target, suffix, prefix); } }); }, { threshold: 0.5 }).observe(el);
   });
 }
+
+// 数字计数动画函数：2000ms内从0滚动到target
+// 使用三次方缓动函数（ease-out cubic），结尾减速使动画更自然
 function animateCounter(el, target, suffix, prefix) {
   const start = performance.now();
   (function tick(now) {
@@ -111,36 +126,292 @@ function animateCounter(el, target, suffix, prefix) {
   })(performance.now());
 }
 
+// 全局颜色常量和图表工具函数
+// 项目统一配色方案
 const C = { fire: '#ff6b35', teal: '#4ecdc4', yellow: '#ffe66d', dim: '#888', steel: '#457b9d', red: '#e76f51', grid: 'rgba(255,255,255,0.05)', tick: '#444' };
+// 销毁指定ID的Chart.js实例，防止在同一canvas上重复创建导致报错
 function killChart(id) { if (charts[id]) { charts[id].destroy(); delete charts[id]; } }
+
+// Ch1: 三类事件年度趋势——堆叠面积图
+// ============================================================
+// Ch1: 百分比堆叠面积图 + 右侧小折线图（总量趋势）
+// 左图：各类型占比变化（强调结构转变）
+// 右图：总出警量趋势（保留绝对数量信息）
+// ============================================================
 
 function createChartYearly() {
   const d = DATA.yearlyByType;
   killChart('yearly');
+  killChart('yearlyTotal');
+
+  // 计算每年三类事件的占比
+  const totalByYear = d.years.map((_, i) =>
+    d.falseAlarm[i] + d.specialService[i] + d.fire[i]
+  );
+  const pctFire = d.fire.map((v, i) =>
+    parseFloat((v / totalByYear[i] * 100).toFixed(1))
+  );
+  const pctSS = d.specialService.map((v, i) =>
+    parseFloat((v / totalByYear[i] * 100).toFixed(1))
+  );
+  const pctFA = d.falseAlarm.map((v, i) =>
+    parseFloat((v / totalByYear[i] * 100).toFixed(1))
+  );
+
+  // ── 左图：百分比堆叠面积图（三条线都显示）──
   charts.yearly = new Chart(document.getElementById('chart-yearly'), {
     type: 'line',
-    data: { labels: d.years, datasets: [
-      { label: 'False Alarm', data: d.falseAlarm, fill: true, backgroundColor: 'rgba(136,136,136,0.25)', borderColor: C.dim, borderWidth: 2, pointRadius: 0, tension: 0.3, order: 3 },
-      { label: 'Special Service', data: d.specialService, fill: true, backgroundColor: 'rgba(78,205,196,0.25)', borderColor: C.teal, borderWidth: 2, pointRadius: 0, tension: 0.3, order: 2 },
-      { label: 'Fire', data: d.fire, fill: true, backgroundColor: 'rgba(255,107,53,0.35)', borderColor: C.fire, borderWidth: 2, pointRadius: 0, tension: 0.3, order: 1 },
-    ]},
-    options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
-      plugins: { legend: { labels: { color: '#888', font: { size: 12 } } }, tooltip: { backgroundColor: 'rgba(10,10,15,0.9)' } },
-      scales: { x: { grid: { color: C.grid }, ticks: { color: C.tick } }, y: { stacked: true, grid: { color: C.grid }, ticks: { color: C.tick, callback: v => (v/1000)+'k' } } }
+    data: {
+      labels: d.years,
+      datasets: [
+        {
+          // False Alarm 放在最顶层（order最大，堆在最上面）
+          label: 'False Alarm',
+          data: pctFA,
+          fill: true,
+          backgroundColor: 'rgba(136,136,136,0.35)',  // 灰色填充，加深一点更可见
+          borderColor: '#aaaaaa',                      // 灰色边线，比原来亮
+          borderWidth: 2,
+          pointRadius: 0,
+          tension: 0.4,
+          order: 3
+        },
+        {
+          // Special Service 放在中间层
+          label: 'Special Service',
+          data: pctSS,
+          fill: true,
+          backgroundColor: 'rgba(78,205,196,0.35)',
+          borderColor: C.teal,
+          borderWidth: 2,
+          pointRadius: 0,
+          tension: 0.4,
+          order: 2
+        },
+        {
+          // Fire 放在最底层（order最小，视觉上在最前）
+          label: 'Fire',
+          data: pctFire,
+          fill: true,
+          backgroundColor: 'rgba(255,107,53,0.45)',
+          borderColor: C.fire,
+          borderWidth: 2,
+          pointRadius: 0,
+          tension: 0.4,
+          order: 1
+        },
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: {
+          labels: { color: '#999', font: { size: 11 }, boxWidth: 12 }
+        },
+        tooltip: {
+          backgroundColor: 'rgba(10,10,15,0.92)',
+          callbacks: {
+            label: ctx => {
+              // tooltip同时显示百分比和绝对数量
+              const i = d.years.indexOf(parseInt(ctx.label));
+              const rawArrays = [d.fire, d.specialService, d.falseAlarm];
+              const raw = rawArrays[ctx.datasetIndex]?.[i];
+              return ` ${ctx.dataset.label}: ${ctx.parsed.y}%` +
+                     (raw !== undefined ? ` (${(raw / 1000).toFixed(1)}k)` : '');
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: C.grid },
+          ticks: { color: C.tick, font: { size: 10 } }
+        },
+        y: {
+          stacked: true,
+          min: 0,
+          max: 100,                              // 固定0-100%
+          grid: { color: C.grid },
+          ticks: {
+            color: C.tick,
+            callback: v => v + '%',
+            stepSize: 25                         // 0 / 25 / 50 / 75 / 100
+          }
+        }
+      }
+    }
+  });
+
+  // ── 右图：总量趋势折线图 ──
+  const totalCanvas = document.getElementById('chart-yearly-total');
+  if (totalCanvas) {
+    charts.yearlyTotal = new Chart(totalCanvas, {
+      type: 'line',
+      data: {
+        labels: d.years,
+        datasets: [{
+          label: 'Total Calls',
+          data: totalByYear,
+          borderColor: 'rgba(255,255,255,0.5)',
+          backgroundColor: 'rgba(255,255,255,0.06)',
+          fill: true,
+          borderWidth: 1.5,
+          pointRadius: 2,
+          pointBackgroundColor: 'rgba(255,255,255,0.7)',
+          tension: 0.4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: 'rgba(10,10,15,0.92)',
+            callbacks: {
+              label: ctx => ` Total: ${(ctx.parsed.y / 1000).toFixed(1)}k calls`
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: { color: C.grid },
+            ticks: { color: C.tick, font: { size: 9 } }
+          },
+          y: {
+            grid: { color: C.grid },
+            ticks: {
+              color: C.tick,
+              font: { size: 9 },
+              callback: v => (v / 1000) + 'k'
+            }
+          }
+        }
+      }
+    });
+  }
+}
+
+// Ch2 Tab1: False Alarm子类型——环形图
+// ============================================================
+// Ch2 Tab1: False Alarm环形图
+// 改造：缩小图表，左侧加大字数字标注
+function createChartFA() {
+  const d = DATA.falseAlarmBreakdown;
+  killChart('fa');
+
+  const total = Object.values(d).reduce((a, b) => a + b, 0);
+  const pctAFA  = (d['AFA'] / total * 100).toFixed(0);
+  const pctGood = (d['False alarm - Good intent'] / total * 100).toFixed(0);
+  const pctMal  = (d['False alarm - Malicious'] / total * 100).toFixed(0);
+
+  // 更新左侧大字数字
+  const statAFA  = document.getElementById('fa-stat-afa');
+  const statGood = document.getElementById('fa-stat-good');
+  const statMal  = document.getElementById('fa-stat-mal');
+  if (statAFA)  statAFA.textContent  = pctAFA + '%';
+  if (statGood) statGood.textContent = pctGood + '%';
+  if (statMal)  statMal.textContent  = pctMal + '%';
+
+  // 中心文字插件
+  const centerTextPlugin = {
+    id: 'centerText',
+    afterDraw(chart) {
+      const { ctx, chartArea: { width, height, left, top } } = chart;
+      ctx.save();
+      const cx = left + width / 2;
+      const cy = top + height / 2;
+      ctx.font = 'bold 26px "JetBrains Mono", monospace';
+      ctx.fillStyle = C.fire;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(pctAFA + '%', cx, cy - 12);
+      ctx.font = '11px Inter, sans-serif';
+      ctx.fillStyle = '#888';
+      ctx.fillText('are AFA', cx, cy + 12);
+      ctx.restore();
+    }
+  };
+
+  charts.fa = new Chart(document.getElementById('chart-fa'), {
+    type: 'doughnut',
+    plugins: [centerTextPlugin],
+    data: {
+      labels: [
+        'AFA (Auto Fire Alarm)',
+        'Good Intent',
+        'Malicious',
+        'Alleged Fire Risk'
+      ],
+      datasets: [{
+        data: Object.values(d),
+        backgroundColor: [C.fire, C.teal, C.yellow, '#555'],
+        borderWidth: 0,
+        hoverOffset: 10
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '55%',
+      layout: {
+        padding: { 
+          top: 0,
+          bottom: 0,
+          left: 0,
+          right: 10 }   // 右侧留一点内边距给图例
+      },
+      plugins: {
+        legend: {
+          position: 'right',         // ← 图例移到右侧
+          align: 'center',
+          labels: {
+            color: '#cccccc',        // ← 亮灰色，与页面其他文字一致
+            font: { size: 13, family: 'Inter, sans-serif' },
+            padding: 20,             // 图例条目之间的间距
+            boxWidth: 12,
+            boxHeight: 12,
+            usePointStyle: true,     // 圆点样式替代方块
+            pointStyle: 'circle',
+            // 图例标签附上百分比
+            generateLabels: chart => {
+              const data = chart.data;
+              return data.labels.map((label, i) => {
+                const val = data.datasets[0].data[i];
+                const pct = (val / total * 100).toFixed(1);
+                return {
+                  text: `${label}  ${pct}%`,
+                  fillStyle: data.datasets[0].backgroundColor[i],
+                  strokeStyle: 'transparent',
+                  fontColor: '#cccccc',
+                  pointStyle: 'circle',
+                  index: i
+                };
+              });
+            }
+          }
+        },
+        tooltip: {
+          backgroundColor: 'rgba(10,10,15,0.92)',
+          callbacks: {
+            label: ctx => {
+              const val = ctx.parsed;
+              const pct = (val / total * 100).toFixed(1);
+              return ` ${ctx.label}: ${pct}% (${val.toLocaleString()})`;
+            }
+          }
+        }
+      }
     }
   });
 }
 
-function createChartFA() {
-  const d = DATA.falseAlarmBreakdown;
-  killChart('fa');
-  charts.fa = new Chart(document.getElementById('chart-fa'), {
-    type: 'doughnut',
-    data: { labels: Object.keys(d), datasets: [{ data: Object.values(d), backgroundColor: [C.fire, C.teal, C.yellow, '#555', '#333'], borderWidth: 0 }] },
-    options: { responsive: true, maintainAspectRatio: false, cutout: '55%', plugins: { legend: { position: 'bottom', labels: { color: '#888', font: { size: 11 } } } } }
-  });
-}
 
+
+// Ch2 Tab2: Fire按物业类型——横向柱状图
 function createChartFireProp() {
   const d = DATA.fireByProperty;
   const labels = Object.keys(d).slice(0, 6), values = labels.map(l => d[l]);
@@ -152,6 +423,7 @@ function createChartFireProp() {
   });
 }
 
+// Ch2 Tab3: Special Service子类型趋势——D3折线图（带动画绘制效果）
 let slopePaths = [];
 
 function createSlopeChart() {
@@ -193,6 +465,8 @@ function createSlopeChart() {
   });
 }
 
+// createSlopeChart() 的动画触发函数
+// 当用户切换到SS Tab时调用，让折线从左到右"画出"
 function animateSlopeChart() {
   slopePaths.forEach(({ path, delay }) => {
     path.interrupt().attr('stroke-dashoffset', path.node().getTotalLength());
@@ -200,6 +474,8 @@ function animateSlopeChart() {
   });
 }
 
+// Three Trajectories 的 Tab 切换逻辑
+// 控制 False Alarm / Fire / Special Service 三个面板的显示切换
 function initTrajectoryTabs() {
   document.querySelectorAll('.traj-tab').forEach(tab => {
     tab.addEventListener('click', () => {
@@ -212,18 +488,27 @@ function initTrajectoryTabs() {
   });
 }
 
+// 三联地图的全局状态变量
 let currentProp = { fire: 't', fa: 't', ss: 't' };
 let showAllYears = true;
 let currentYear = 2014;
 const triMaps = {};
 const triData = {};
 
+// 色阶计算辅助函数
+// 计算指定GeoJSON数据集中某个属性的第95百分位数值
+// 用第95百分位而非最大值是为了防止极端异常值使整张地图颜色扁平化
+// （如果某一两个网格事件数远超其他，用最大值会让大部分网格颜色都很深）
 function calcMax(geojson, prop) {
   let vals = geojson.features.map(f => f.properties[prop] || 0).sort((a,b) => a-b);
   // 95th percentile clip avoids outlier-driven flat maps
   return vals[Math.floor(vals.length * 0.95)] || 1;
 }
 
+// 生成Mapbox的fill-color表达式（插值颜色映射）
+// prop: 要映射的数据字段名
+// maxVal: 色阶最大值（由calcMax提供）
+// 返回一个Mapbox GL JS的表达式数组，实现从深色→青绿→黄→橙→红的渐变
 function getColorExpr(prop, maxVal) {
   const m = Math.max(maxVal, 1);
   return ['interpolate', ['linear'], ['get', prop],
@@ -231,6 +516,8 @@ function getColorExpr(prop, maxVal) {
     m * 0.45, '#ffe66d', m * 0.7, '#ff6b35', m, '#ff0000'];
 }
 
+// 三联密度地图初始化
+// 并行加载4个GeoJSON文件，建立三张联动的Mapbox地图
 async function initTripleMaps() {
   const [boroughs, gridFire, gridFA, gridSS] = await Promise.all([
     fetch('data/london_boroughs.json').then(r => r.json()),
@@ -239,12 +526,14 @@ async function initTripleMaps() {
     fetch('data/grid_ss.json').then(r => r.json()),
   ]);
 
+  // 三张地图共享的初始配置
   const cfg = { style: 'mapbox://styles/mapbox/dark-v11', center: [-0.1, 51.51], zoom: 9.2, pitch: 0, interactive: true, attributionControl: false };
 
   triData.fire = gridFire;
   triData.fa = gridFA;
   triData.ss = gridSS;
 
+  // 单张地图的设置函数（三张地图复用同一套逻辑）
   function setupMap(containerId, gridData, mapKey) {
     const map = new mapboxgl.Map({ container: containerId, ...cfg });
     triMaps[mapKey] = map;
@@ -256,7 +545,8 @@ async function initTripleMaps() {
       map.addLayer({ id: 'grid-fill', type: 'fill', source: 'grid', paint: {
         'fill-color': getColorExpr('t', initMax), 'fill-opacity': 0.85 } });
       map.addLayer({ id: 'blines', type: 'line', source: 'boroughs', paint: { 'line-color': 'rgba(255,255,255,0.5)', 'line-width': 1.2 } });
-
+      
+      // 鼠标悬停tooltip逻辑
       map.on('mousemove', 'grid-fill', e => {
         if (!e.features.length) return;
         map.getCanvas().style.cursor = 'pointer';
@@ -266,17 +556,21 @@ async function initTripleMaps() {
         const lbl = showAllYears ? (currentProp[mapKey] === 't' ? 'All types' : currentProp[mapKey]) : currentYear;
         document.getElementById('triple-hover').innerHTML = `250m grid [${lbl}]: <em>${val}</em> incidents (total across all years: ${p.t})`;
       });
+
+      // 鼠标离开网格时恢复默认提示文字
       map.on('mouseleave', 'grid-fill', () => {
         map.getCanvas().style.cursor = '';
         document.getElementById('triple-hover').innerHTML = '<span class="hover-hint">Hover a cell. Use slider for years, pills for sub-types.</span>';
       });
     });
   }
-
+  
+  // 分别建立三张地图，绑定各自的HTML容器ID和数据
   setupMap('map-fire', gridFire, 'fire');
   setupMap('map-fa', gridFA, 'fa');
   setupMap('map-ss', gridSS, 'ss');
 
+  // 三图联动缩放逻辑
   let syncing = false;
   function sync(src, targets) {
     src.on('move', () => {
@@ -323,6 +617,7 @@ async function initTripleMaps() {
   });
   allBtn.classList.add('active');
 
+  // 自动播放逻辑（2014→2025逐年切换）
   let playing = false, playIv = null;
   playBtn.addEventListener('click', () => {
     if (playing) { clearInterval(playIv); playBtn.textContent = 'Play'; playing = false; return; }
@@ -339,6 +634,9 @@ async function initTripleMaps() {
     }, 1200);
   });
 
+  // 三联地图底部的子类型 Pill 切换逻辑
+  // 每张地图下方有各自的pill按钮组（如Fire图下有Dwelling/Outdoor/Structure/Vehicle）
+  // 点击pill后，对应地图切换显示该子类型的密度分布
   document.querySelectorAll('.sub-pills').forEach(pillGroup => {
     const mapKey = pillGroup.dataset.map;
     pillGroup.querySelectorAll('.pill').forEach(pill => {
@@ -352,6 +650,9 @@ async function initTripleMaps() {
   });
 }
 
+// 响应时间地图初始化
+// 单张全宽地图，显示全伦敦250m网格平均响应时间
+// 叠加可开关的消防站点位图层
 async function initResponseMap() {
   const [boroughs, gridResp, stations] = await Promise.all([
     fetch('data/london_boroughs.json').then(r => r.json()),
@@ -359,20 +660,30 @@ async function initResponseMap() {
     fetch('data/stations.json').then(r => r.json()),
   ]);
   mapResp = new mapboxgl.Map({ container: 'map-response', style: 'mapbox://styles/mapbox/dark-v11', center: [-0.1, 51.51], zoom: 9.2, pitch: 0, interactive: true, attributionControl: false });
+  // 获取"显示消防站"按钮，并动态写入消防站数量（102个）
   const toggleBtn = document.getElementById('station-toggle');
   if (toggleBtn) toggleBtn.textContent = `Show ${stations.features.length} Fire Stations`;
 
+  // 添加三个数据源
   mapResp.on('load', () => {
     mapResp.addSource('grid', { type: 'geojson', data: gridResp });
     mapResp.addSource('boroughs', { type: 'geojson', data: boroughs });
     mapResp.addSource('stations', { type: 'geojson', data: stations });
 
+    // ── 图层1：响应时间热力网格 ──
+    // 使用归一化字段'd'（0-100）做颜色映射
+    // 注意：这里不用calcMax而是直接用0-100，因为d字段已经是预处理好的分位数
+    // 颜色含义：深蓝=快速响应，红色=响应最慢
     mapResp.addLayer({ id: 'grid-fill', type: 'fill', source: 'grid', paint: {
       'fill-color': ['interpolate', ['linear'], ['get', 'd'], 0, '#1a1a2e', 20, '#2d4a3e', 40, '#4ecdc4', 60, '#ffe66d', 80, '#ff6b35', 100, '#ff0000'], 'fill-opacity': 0.85 } });
-
+     
+    // ── 图层2：Borough边界线 ──
     mapResp.addLayer({ id: 'blines', type: 'line', source: 'boroughs', paint: { 'line-color': 'rgba(255,255,255,0.5)', 'line-width': 1.2 } });
+    // ── 图层3：Borough名称标签 ──
+    // 与三联地图不同，响应时间地图额外显示borough名字（因为是单图，空间充裕）
     mapResp.addLayer({ id: 'blabels', type: 'symbol', source: 'boroughs', layout: { 'text-field': ['get', 'name'], 'text-size': 9, 'text-anchor': 'center' }, paint: { 'text-color': 'rgba(255,255,255,0.4)', 'text-halo-color': 'rgba(0,0,0,0.5)', 'text-halo-width': 1 } });
-
+    // ── 图层4：消防站点位（空心白圆圈）──
+    // 初始隐藏（visibility: 'none'），点击按钮后才显示
     mapResp.addLayer({ id: 'station-dots', type: 'circle', source: 'stations', paint: {
       'circle-radius': ['interpolate', ['linear'], ['zoom'], 8, 2, 11, 3.5, 13, 5],
       'circle-color': 'transparent',
@@ -380,13 +691,16 @@ async function initResponseMap() {
       'circle-stroke-width': ['interpolate', ['linear'], ['zoom'], 8, 1, 12, 1.5],
       'circle-opacity': 0.8,
     }, layout: { 'visibility': 'none' }});
-
+    
+    // 图层5：消防站名称标签
+    // 同样初始隐藏，且只在zoom≥11时显示（避免缩小时标签重叠）
     mapResp.addLayer({ id: 'station-labels', type: 'symbol', source: 'stations',
       layout: { 'text-field': ['get', 'name'], 'text-size': 8, 'text-anchor': 'top', 'text-offset': [0, 0.6], 'visibility': 'none' },
       paint: { 'text-color': 'rgba(255,255,255,0.8)', 'text-halo-color': 'rgba(0,0,0,0.8)', 'text-halo-width': 1 },
       minzoom: 11,
     });
 
+    // 消防站显示/隐藏切换按钮
     toggleBtn?.addEventListener('click', function() {
       const show = mapResp.getLayoutProperty('station-dots', 'visibility') === 'none';
       mapResp.setLayoutProperty('station-dots', 'visibility', show ? 'visible' : 'none');
@@ -394,6 +708,7 @@ async function initResponseMap() {
       this.classList.toggle('active', show);
     });
 
+    // ── 网格hover tooltip：显示响应时间 ──
     mapResp.on('mousemove', 'grid-fill', e => {
       if (!e.features.length) return;
       mapResp.getCanvas().style.cursor = 'pointer';
@@ -402,6 +717,7 @@ async function initResponseMap() {
     });
     mapResp.on('mouseleave', 'grid-fill', () => { mapResp.getCanvas().style.cursor = ''; });
 
+    // ── 消防站点hover tooltip：显示站名和服务事件数 ──
     mapResp.on('mouseenter', 'station-dots', e => {
       mapResp.getCanvas().style.cursor = 'pointer';
       if (e.features.length) {
@@ -417,6 +733,62 @@ async function initResponseMap() {
   new IntersectionObserver(e => { e.forEach(x => { if (x.isIntersecting) mapResp?.resize(); }); }, { threshold: 0.1 }).observe(document.getElementById('map-response'));
 }
 
+// borough级响应时间排名横向柱状图
+function createChartResponseRanking() {
+  // 从boroughData提取响应时间，按降序排列取前15个
+  const sorted = Object.entries(DATA.boroughData)
+    .map(([name, d]) => ({ name, resp: d.avgResponseSec }))
+    .sort((a, b) => b.resp - a.resp)
+    .slice(0, 15);
+
+  const inner = ['Camden','City of London','Greenwich','Hackney',
+    'Hammersmith and Fulham','Islington','Kensington and Chelsea',
+    'Lambeth','Lewisham','Newham','Southwark','Tower Hamlets',
+    'Wandsworth','Westminster','Haringey'];
+
+  killChart('respRank');
+  charts.respRank = new Chart(document.getElementById('chart-resp-rank'), {
+    type: 'bar',
+    data: {
+      labels: sorted.map(d => d.name),
+      datasets: [{
+        data: sorted.map(d => d.resp),
+        backgroundColor: sorted.map(d =>
+          inner.includes(d.name)
+            ? 'rgba(255,107,53,0.7)'
+            : 'rgba(78,205,196,0.7)'
+        ),
+        borderRadius: 3
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      indexAxis: 'y',
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => ` ${ctx.parsed.x}s avg response`
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: C.grid },
+          ticks: { color: C.tick, callback: v => v + 's' },
+          min: 260
+        },
+        y: { grid: { display: false }, ticks: { color: '#ccc', font: { size: 10 } } }
+      }
+    }
+  });
+}
+
+// Danger Zone 散点图
+// x轴：各borough的Special Service增长率（2014-2025）
+// y轴：各borough的平均响应时间（秒）
+// 气泡大小：人口规模
+// 颜色：内伦敦（橙）vs 外伦敦（青）
 function initScatterPlot() {
   const container = document.getElementById('scatter-plot').parentElement;
   const svg = d3.select('#scatter-plot');
@@ -447,12 +819,15 @@ function initScatterPlot() {
 
   const tooltip = d3.select(container).append('div').style('position', 'absolute').style('background', 'rgba(10,10,15,0.92)').style('border', '1px solid rgba(255,255,255,0.1)').style('border-radius', '8px').style('padding', '8px 12px').style('font-size', '12px').style('color', '#ccc').style('pointer-events', 'none').style('opacity', 0).style('z-index', 10);
 
+  // ── 绘制气泡 ──
+  // 初始状态：气泡在x轴底部，半径为0（为入场动画做准备）
   const dots = svg.selectAll('circle').data(boroughs).join('circle')
     .attr('cx', d => x(d.ssGrowth)).attr('cy', H - M.bottom).attr('r', 0)
     .attr('fill', d => d.isInner ? C.fire : C.teal).attr('fill-opacity', 0.7).attr('stroke', d => d.isInner ? C.fire : C.teal).attr('stroke-width', 1);
 
   new IntersectionObserver(e => { e.forEach(x2 => { if (x2.isIntersecting) { dots.transition().duration(1000).delay((d, i) => i * 30).attr('cy', d => y(d.responseTime)).attr('r', d => r(d.population)); } }); }, { threshold: 0.3 }).observe(container);
 
+  // ── 气泡交互事件 ──
   dots.on('mouseenter', (event, d) => {
     d3.select(event.target).attr('fill-opacity', 1).attr('stroke-width', 2);
     tooltip.style('opacity', 1).html(`<strong>${d.name}</strong><br>SS growth: ${d.ssGrowth}%<br>Response: ${d.responseTime}s<br>Pop: ${d.population.toLocaleString()}<br>${d.isInner ? 'Inner' : 'Outer'} London`);
@@ -461,6 +836,7 @@ function initScatterPlot() {
     tooltip.style('left', (event.clientX - rect.left + 12) + 'px').style('top', (event.clientY - rect.top - 10) + 'px');
   }).on('mouseleave', event => { d3.select(event.target).attr('fill-opacity', 0.7).attr('stroke-width', 1); tooltip.style('opacity', 0); });
 
+  // ── 右上角图例（内/外伦敦颜色说明）──
   const lg = svg.append('g').attr('transform', `translate(${W - M.right - 140}, ${M.top + 5})`);
   [{ label: 'Inner London', color: C.fire }, { label: 'Outer London', color: C.teal }].forEach((d, i) => {
     lg.append('circle').attr('cx', 0).attr('cy', i * 18).attr('r', 5).attr('fill', d.color).attr('fill-opacity', 0.7);
@@ -468,6 +844,125 @@ function initScatterPlot() {
   });
 }
 
+function createChartDualPanel() {
+  const inner = ['Camden','City of London','Greenwich','Hackney',
+    'Hammersmith and Fulham','Islington','Kensington and Chelsea',
+    'Lambeth','Lewisham','Newham','Southwark','Tower Hamlets',
+    'Wandsworth','Westminster','Haringey'];
+
+  // 按SS增长率降序排列所有borough
+  const sorted = Object.entries(DATA.boroughData)
+    .filter(([, d]) => d.ssGrowth > 0)
+    .map(([name, d]) => ({
+      name,
+      growth: d.ssGrowth,
+      resp: d.avgResponseSec,
+      isInner: inner.includes(name)
+    }))
+    .sort((a, b) => b.growth - a.growth);
+
+  const labels = sorted.map(d => d.name);
+  const colors = sorted.map(d =>
+    d.isInner ? 'rgba(255,107,53,0.75)' : 'rgba(78,205,196,0.75)'
+  );
+
+  // ── 上图：SS增长率 ──
+  killChart('dualGrowth');
+  charts.dualGrowth = new Chart(
+    document.getElementById('chart-dual-growth'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'SS Growth Rate (%)',
+        data: sorted.map(d => d.growth),
+        backgroundColor: colors,
+        borderRadius: 2
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => ` SS growth: +${ctx.parsed.y}%`,
+            afterLabel: ctx => sorted[ctx.dataIndex].isInner
+              ? 'Inner London' : 'Outer London'
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: { display: false }  // x轴标签只在下图显示，避免重复
+        },
+        y: {
+          grid: { color: C.grid },
+          ticks: { color: C.tick, callback: v => v + '%' },
+          title: {
+            display: true,
+            text: 'SS Growth Rate 2014–2025 (%)',
+            color: C.tick, font: { size: 10 }
+          }
+        }
+      }
+    }
+  });
+
+  // ── 下图：平均响应时间 ──
+  killChart('dualResp');
+  charts.dualResp = new Chart(
+    document.getElementById('chart-dual-resp'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Avg Response Time (s)',
+        data: sorted.map(d => d.resp),
+        backgroundColor: colors,
+        borderRadius: 2
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => ` Avg response: ${ctx.parsed.y}s`,
+            afterLabel: ctx => sorted[ctx.dataIndex].isInner
+              ? 'Inner London' : 'Outer London'
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: {
+            color: '#aaa', font: { size: 9 },
+            maxRotation: 45, minRotation: 30
+          }
+        },
+        y: {
+          grid: { color: C.grid },
+          ticks: { color: C.tick, callback: v => v + 's' },
+          min: 260,
+          title: {
+            display: true,
+            text: 'Avg First Pump Attendance (s)',
+            color: C.tick, font: { size: 10 }
+          }
+        }
+      }
+    }
+  });
+}
+
+// 索引化辅助函数
+// 将绝对数量数组转换为以第一个值为基准100的指数
+// 用于内外伦敦对比图，消除绝对数量差异，突出增长率变化
+// 例如：[50, 55, 60] → [100, 110, 120]（增长了10%和20%）
 function indexify(arr) {
   const base = arr[0] || 1;
   return arr.map(v => Math.round(v / base * 100));
@@ -517,6 +1012,7 @@ function createChartInOut(filter) {
   });
 }
 
+// 内外伦敦图的Tab切换（All Types / Fire / False Alarm / Special Service）
 function initInOutTabs() {
   document.querySelectorAll('.inout-tabs .pill').forEach(pill => {
     pill.addEventListener('click', () => {
@@ -527,6 +1023,9 @@ function initInOutTabs() {
   });
 }
 
+// IMD贫困分位 vs 火灾率柱状图
+// 4个柱子分别代表按IMD四分位划分的ward组
+// Q1=最富裕，Q4=最贫困
 function createChartQuartile() {
   const d = DATA.imdQuartile;
   killChart('quartile');
@@ -539,27 +1038,262 @@ function createChartQuartile() {
   });
 }
 
-function createChartMonthlyAll() {
-  const d = DATA.monthlyByType;
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  killChart('monthlyAll');
-  charts.monthlyAll = new Chart(document.getElementById('chart-monthly-all'), {
-    type: 'line',
-    data: { labels: months, datasets: [
-      { label: 'Outdoor Fire', data: d.outdoor_fire, borderColor: C.fire, borderWidth: 2, pointRadius: 3, tension: 0.3 },
-      { label: 'Dwelling Fire', data: d.dwelling_fire, borderColor: '#f4a261', borderWidth: 2, pointRadius: 3, tension: 0.3, borderDash: [5, 3] },
-      { label: 'Flooding', data: d.flooding, borderColor: C.teal, borderWidth: 2, pointRadius: 3, tension: 0.3 },
-      { label: 'Forced Entry', data: d.forced_entry, borderColor: C.steel, borderWidth: 2, pointRadius: 3, tension: 0.3 },
-      { label: 'Agency Assist', data: d.agency_assist, borderColor: C.yellow, borderWidth: 2, pointRadius: 3, tension: 0.3 },
-      { label: 'False Alarm', data: d.false_alarm, borderColor: C.dim, borderWidth: 1.5, pointRadius: 2, tension: 0.3, borderDash: [3, 3] },
-    ]},
-    options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
-      plugins: { legend: { position: 'bottom', labels: { color: '#888', font: { size: 10 }, boxWidth: 14 } } },
-      scales: { x: { grid: { color: C.grid }, ticks: { color: C.tick } }, y: { grid: { color: C.grid }, ticks: { color: C.tick, callback: v => (v/1000)+'k' } } }
+// borough级别IMD/火灾发生的双变量分析图
+function createBivariateMap() {
+  // 需要london_boroughs.json里有IMD数据
+  // 由于现有boroughs.json只有name和color字段，需要手动加入IMD数据
+  
+  // 从fire_data.json的boroughData提取数据
+  // 用totalFire/population算每千人火灾率，用ssGrowth近似代表压力
+  const boroughStats = Object.entries(DATA.boroughData).map(([name, d]) => ({
+    name,
+    fireRate: (d.totalFire / d.population * 1000).toFixed(2),
+    responseTime: d.avgResponseSec
+  }));
+
+  // 9色双变量矩阵（3×3）
+  // x轴：火灾率（低/中/高），y轴：响应时间（快/中/慢）
+  const bivColors = {
+    '1-1': '#e8e8e8', '2-1': '#ace4e4', '3-1': '#5ac8c8',
+    '1-2': '#dfb0d6', '2-2': '#a5add3', '3-2': '#5698b9',
+    '1-3': '#be64ac', '2-3': '#8c62aa', '3-3': '#3b4994'
+  };
+
+  // 计算分位（三分位）
+  const fireRates = boroughStats.map(d => parseFloat(d.fireRate)).sort((a,b)=>a-b);
+  const respTimes = boroughStats.map(d => d.responseTime).sort((a,b)=>a-b);
+  const fireQ = [
+    fireRates[Math.floor(fireRates.length * 0.33)],
+    fireRates[Math.floor(fireRates.length * 0.66)]
+  ];
+  const respQ = [
+    respTimes[Math.floor(respTimes.length * 0.33)],
+    respTimes[Math.floor(respTimes.length * 0.66)]
+  ];
+
+  function getClass(val, breaks) {
+    if (val <= breaks[0]) return 1;
+    if (val <= breaks[1]) return 2;
+    return 3;
+  }
+
+  // 给每个borough赋予双变量颜色
+  const colorMap = {};
+  boroughStats.forEach(d => {
+    const fx = getClass(parseFloat(d.fireRate), fireQ);
+    const ry = getClass(d.responseTime, respQ);
+    colorMap[d.name] = bivColors[`${fx}-${ry}`];
+  });
+
+  // 初始化地图
+  const mapBiv = new mapboxgl.Map({
+    container: 'map-bivariate',
+    style: 'mapbox://styles/mapbox/dark-v11',
+    center: [-0.1, 51.51], zoom: 9,
+    interactive: true, attributionControl: false
+  });
+
+  mapBiv.on('load', async () => {
+    const boroughs = await fetch('data/london_boroughs.json').then(r => r.json());
+
+    // 给每个borough feature加入颜色属性
+    boroughs.features.forEach(f => {
+      f.properties.bivColor = colorMap[f.properties.name] || '#333';
+    });
+
+    mapBiv.addSource('boroughs-biv', { type: 'geojson', data: boroughs });
+    mapBiv.addLayer({
+      id: 'biv-fill', type: 'fill', source: 'boroughs-biv',
+      paint: {
+        'fill-color': ['get', 'bivColor'],
+        'fill-opacity': 0.8
+      }
+    });
+    mapBiv.addLayer({
+      id: 'biv-line', type: 'line', source: 'boroughs-biv',
+      paint: { 'line-color': 'rgba(255,255,255,0.3)', 'line-width': 0.8 }
+    });
+
+    // borough名称标签
+    mapBiv.addLayer({
+      id: 'biv-labels', type: 'symbol', source: 'boroughs-biv',
+      layout: {
+        'text-field': ['get', 'name'],
+        'text-size': 9, 'text-anchor': 'center'
+      },
+      paint: {
+        'text-color': 'rgba(255,255,255,0.7)',
+        'text-halo-color': 'rgba(0,0,0,0.5)',
+        'text-halo-width': 1
+      }
+    });
+
+    // hover tooltip
+    mapBiv.on('mousemove', 'biv-fill', e => {
+      if (!e.features.length) return;
+      const name = e.features[0].properties.name;
+      const stat = boroughStats.find(d => d.name === name);
+      if (stat) {
+        document.getElementById('biv-hover').innerHTML =
+          `<strong>${name}</strong> · Fire rate: ${stat.fireRate}/1k · 
+           Avg response: ${stat.responseTime}s`;
+      }
+    });
+    mapBiv.on('mouseleave', 'biv-fill', () => {
+      document.getElementById('biv-hover').innerHTML =
+        '<span class="hover-hint">Hover a borough to see details</span>';
+    });
+  });
+
+  // 替换原来的 IntersectionObserver 部分
+let bivResized = false;
+const bivObserver = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      // 每次进入视口都触发resize，解决定格问题
+      setTimeout(() => mapBiv?.resize(), 100);
+      if (!bivResized) {
+        bivResized = true;
+        // 首次进入时强制重新渲染
+        setTimeout(() => {
+          mapBiv?.resize();
+          mapBiv?.setCenter([-0.1, 51.51]);
+        }, 300);
+      }
     }
   });
+}, { threshold: 0.1 });
+
+bivObserver.observe(document.getElementById('map-bivariate'));
+
+// 窗口resize时同步更新地图
+window.addEventListener('resize', () => {
+  setTimeout(() => mapBiv?.resize(), 100);
+});
 }
 
+
+// 月度季节性总览折线图（The Seasonal Landscape）
+// 6条线同时显示，展示各类事件的全年分布模式
+// 这是scrollytelling之前的总览图，让读者先建立整体印象
+function createChartMonthlyAll() {
+  const d = DATA.monthlyByType;
+  const months = ['Jan','Feb','Mar','Apr','May','Jun',
+                  'Jul','Aug','Sep','Oct','Nov','Dec'];
+  killChart('monthlyAll');
+
+  // 去掉False Alarm，只保留5条有季节意义的线
+  const datasets = [
+    { 
+      label: 'Outdoor Fire', data: d.outdoor_fire,
+      borderColor: C.fire, borderWidth: 2.5,
+      pointRadius: 4, pointHoverRadius: 7,
+      tension: 0.4, fill: false
+    },
+    { 
+      label: 'Dwelling Fire', data: d.dwelling_fire,
+      borderColor: '#f4a261', borderWidth: 2,
+      pointRadius: 3, pointHoverRadius: 6,
+      tension: 0.4, fill: false,
+      borderDash: [5, 3]
+    },
+    { 
+      label: 'Flooding', data: d.flooding,
+      borderColor: C.teal, borderWidth: 2.5,
+      pointRadius: 4, pointHoverRadius: 7,
+      tension: 0.4, fill: false
+    },
+    { 
+      label: 'Forced Entry', data: d.forced_entry,
+      borderColor: C.steel, borderWidth: 2.5,
+      pointRadius: 4, pointHoverRadius: 7,
+      tension: 0.4, fill: false
+    },
+    { 
+      label: 'Agency Assist', data: d.agency_assist,
+      borderColor: C.yellow, borderWidth: 2,
+      pointRadius: 3, pointHoverRadius: 6,
+      tension: 0.4, fill: false
+    },
+  ];
+
+  // 动画配置：线条从左到右逐渐绘制出来
+  charts.monthlyAll = new Chart(document.getElementById('chart-monthly-all'), {
+    type: 'line',
+    data: { labels: months, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      // 入场动画：每条线依次从左绘制
+      animation: {
+        x: {
+          type: 'number',
+          easing: 'easeInOutQuart',
+          duration: 1200,
+          from: NaN,
+          delay(ctx) {
+            // 每个数据点依次延迟，形成从左到右绘制的效果
+            if (ctx.type !== 'data' || ctx.xStarted) return 0;
+            ctx.xStarted = true;
+            return ctx.index * 60; // 每个月份点延迟60ms
+          }
+        },
+        y: {
+          type: 'number',
+          easing: 'easeInOutQuart',
+          duration: 1200,
+          from: ctx => ctx.index === 0 ? ctx.chart.scales.y.getPixelForValue(100) : undefined,
+          delay(ctx) {
+            if (ctx.type !== 'data' || ctx.yStarted) return 0;
+            ctx.yStarted = true;
+            return ctx.index * 60;
+          }
+        }
+      },
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { color: '#ccc', font: { size: 11 }, boxWidth: 14 }
+        },
+        tooltip: {
+          backgroundColor: 'rgba(10,10,15,0.92)',
+          callbacks: {
+            label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString()}`
+          }
+        }
+      },
+      scales: {
+        x: { grid: { color: C.grid }, ticks: { color: C.tick } },
+        y: {
+          grid: { color: C.grid },
+          ticks: { color: C.tick, callback: v => (v/1000)+'k' },
+          // y轴范围限制到0-15k，不受False Alarm影响
+          min: 0,
+          max: 15000
+        }
+      }
+    }
+  });
+
+  // 进入视口时重新触发动画
+  let animated = false;
+  new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting && !animated) {
+        animated = true;
+        charts.monthlyAll.reset();
+        charts.monthlyAll.update();
+      }
+    });
+  }, { threshold: 0.3 }).observe(
+    document.getElementById('chart-monthly-all')
+  );
+}
+
+// Scrollytelling 月度专注图
+// 随用户向下滚动，左侧图表依次高亮各个事件类型
+// 最后一步"collision"同时显示4条线，展示季节性碰撞
 let monthlyFocusChart = null;
 
 function initScrollytelling() {
@@ -567,11 +1301,12 @@ function initScrollytelling() {
   const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
   const configs = {
-    outdoor: { data: d.outdoor_fire, color: C.fire, label: 'Outdoor Fire' },
+    overview: null,
+    outdoor:  { data: d.outdoor_fire,  color: C.fire,   label: 'Outdoor Fire' },
     dwelling: { data: d.dwelling_fire, color: '#f4a261', label: 'Dwelling Fire' },
-    flooding: { data: d.flooding, color: C.teal, label: 'Flooding' },
-    entry: { data: d.forced_entry, color: C.steel, label: 'Forced Entry' },
-    assist: { data: d.agency_assist, color: C.yellow, label: 'Agency Assist' },
+    flooding: { data: d.flooding,      color: C.teal,   label: 'Flooding' },
+    entry:    { data: d.forced_entry,  color: C.steel,  label: 'Forced Entry' },
+    assist:   { data: d.agency_assist, color: C.yellow, label: 'Agency Assist' },
     collision: null,
   };
 
@@ -580,11 +1315,20 @@ function initScrollytelling() {
     if (monthlyFocusChart) monthlyFocusChart.destroy();
 
     let datasets;
-    if (step === 'collision') {
+
+    if (step === 'overview') {
       datasets = [
-        { label: 'Outdoor Fire', data: d.outdoor_fire, borderColor: C.fire, backgroundColor: C.fire + '20', fill: true, borderWidth: 2, pointRadius: 2, tension: 0.3 },
-        { label: 'Flooding', data: d.flooding, borderColor: C.teal, backgroundColor: C.teal + '20', fill: true, borderWidth: 2, pointRadius: 2, tension: 0.3 },
-        { label: 'Forced Entry', data: d.forced_entry, borderColor: C.steel, backgroundColor: C.steel + '20', fill: true, borderWidth: 2, pointRadius: 2, tension: 0.3 },
+        { label: 'Outdoor Fire',  data: d.outdoor_fire,  borderColor: C.fire   + '88', fill: false, borderWidth: 1.5, pointRadius: 0, tension: 0.4 },
+        { label: 'Dwelling Fire', data: d.dwelling_fire, borderColor: '#f4a261' + '88', fill: false, borderWidth: 1.5, pointRadius: 0, tension: 0.4 },
+        { label: 'Flooding',      data: d.flooding,      borderColor: C.teal   + '88', fill: false, borderWidth: 1.5, pointRadius: 0, tension: 0.4 },
+        { label: 'Forced Entry',  data: d.forced_entry,  borderColor: C.steel  + '88', fill: false, borderWidth: 1.5, pointRadius: 0, tension: 0.4 },
+        { label: 'Agency Assist', data: d.agency_assist, borderColor: C.yellow + '88', fill: false, borderWidth: 1.5, pointRadius: 0, tension: 0.4 },
+      ];
+    } else if (step === 'collision') {
+      datasets = [
+        { label: 'Outdoor Fire',  data: d.outdoor_fire,  borderColor: C.fire,   backgroundColor: C.fire   + '20', fill: true, borderWidth: 2, pointRadius: 2, tension: 0.3 },
+        { label: 'Flooding',      data: d.flooding,      borderColor: C.teal,   backgroundColor: C.teal   + '20', fill: true, borderWidth: 2, pointRadius: 2, tension: 0.3 },
+        { label: 'Forced Entry',  data: d.forced_entry,  borderColor: C.steel,  backgroundColor: C.steel  + '20', fill: true, borderWidth: 2, pointRadius: 2, tension: 0.3 },
         { label: 'Agency Assist', data: d.agency_assist, borderColor: C.yellow, backgroundColor: C.yellow + '20', fill: true, borderWidth: 2, pointRadius: 2, tension: 0.3 },
       ];
     } else {
@@ -596,9 +1340,15 @@ function initScrollytelling() {
     monthlyFocusChart = new Chart(canvas, {
       type: 'line',
       data: { labels: months, datasets },
-      options: { responsive: true, maintainAspectRatio: false, animation: { duration: 600 },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: { duration: 600 },
         plugins: { legend: { labels: { color: '#888' } } },
-        scales: { x: { grid: { color: C.grid }, ticks: { color: C.tick } }, y: { grid: { color: C.grid }, ticks: { color: C.tick, callback: v => v >= 1000 ? (v/1000)+'k' : v }, beginAtZero: true } }
+        scales: {
+          x: { grid: { color: C.grid }, ticks: { color: C.tick } },
+          y: { grid: { color: C.grid }, ticks: { color: C.tick, callback: v => v >= 1000 ? (v/1000)+'k' : v }, beginAtZero: true }
+        }
       }
     });
   }
@@ -614,3 +1364,365 @@ function initScrollytelling() {
     window.addEventListener('resize', scroller.resize);
   }, 500);
 }
+
+
+// ============================================================
+// 特效1：鼠标追踪光晕（在现有代码末尾添加）
+// ============================================================
+function initCursorGlow() {
+  // 创建光晕DOM元素
+  const glow = document.createElement('div');
+  glow.style.cssText = `
+    position: fixed;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    pointer-events: none;        /* 不拦截任何鼠标事件 */
+    z-index: 9999;
+    background: radial-gradient(circle, 
+      rgba(255,107,53,0.06) 0%, 
+      rgba(78,205,196,0.03) 40%, 
+      transparent 70%);
+    transform: translate(-50%, -50%);
+    transition: opacity 0.3s ease;
+    mix-blend-mode: screen;      /* 叠加混合模式，不遮挡内容 */
+  `;
+  document.body.appendChild(glow);
+
+  let mouseX = 0, mouseY = 0;
+  let glowX = 0, glowY = 0;
+
+  document.addEventListener('mousemove', e => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+  });
+
+  // 用requestAnimationFrame让光晕平滑跟随（带延迟感，比直接跟随更自然）
+  function animateGlow() {
+    glowX += (mouseX - glowX) * 0.08;  // 0.08是缓动系数，越小越滞后
+    glowY += (mouseY - glowY) * 0.08;
+    glow.style.left = glowX + 'px';
+    glow.style.top = glowY + 'px';
+    requestAnimationFrame(animateGlow);
+  }
+  animateGlow();
+
+  // 鼠标悬停在图表或地图上时，光晕变色为青绿色
+  document.querySelectorAll('.chart-box, .single-map-wrap, .triple-maps').forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      glow.style.background = `radial-gradient(circle, 
+        rgba(78,205,196,0.08) 0%, 
+        rgba(78,205,196,0.03) 40%, 
+        transparent 70%)`;
+    });
+    el.addEventListener('mouseleave', () => {
+      glow.style.background = `radial-gradient(circle, 
+        rgba(255,107,53,0.06) 0%, 
+        rgba(78,205,196,0.03) 40%, 
+        transparent 70%)`;
+    });
+  });
+}
+
+// ============================================================
+// 特效2：KPI卡片3D倾斜效果
+// 鼠标在卡片上移动时，卡片轻微3D倾斜跟随视角
+// ============================================================
+function initCardTilt() {
+  document.querySelectorAll('.kpi-card').forEach(card => {
+    card.style.transition = 'transform 0.1s ease, box-shadow 0.1s ease';
+    card.style.transformStyle = 'preserve-3d';
+
+    card.addEventListener('mousemove', e => {
+      const rect = card.getBoundingClientRect();
+      // 计算鼠标在卡片内的相对位置（-1到1的范围）
+      const xRel = (e.clientX - rect.left) / rect.width - 0.5;   // -0.5到0.5
+      const yRel = (e.clientY - rect.top) / rect.height - 0.5;
+      // 转换为倾斜角度（最大8度）
+      const rotateX = -yRel * 8;  // 上下倾斜
+      const rotateY = xRel * 8;   // 左右倾斜
+      card.style.transform = `perspective(600px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
+      card.style.boxShadow = `${-xRel * 10}px ${-yRel * 10}px 20px rgba(255,107,53,0.15)`;
+    });
+
+    card.addEventListener('mouseleave', () => {
+      // 鼠标离开时平滑恢复原始状态
+      card.style.transform = 'perspective(600px) rotateX(0) rotateY(0) scale(1)';
+      card.style.boxShadow = 'none';
+    });
+  });
+}
+
+// ============================================================
+// Bridge区域：Three.js 3D粒子球背景
+// 三个bridge各自有不同颜色的粒子球
+// ============================================================
+
+function initBridgeParticles() {
+
+  // ── Bridge 1：1 in 7 比例粒子球 ──
+  // 1/7橙色（Fire），6/7灰色，视觉化"1 in 7"
+  (function setupBridge1() {
+    const canvas = document.getElementById('bridge-canvas-1');
+    if (!canvas) return;
+
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setClearColor(0x000000, 0);
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(60, 2, 0.1, 1000);
+    camera.position.z = 3;
+
+    const total = 1400;
+    const fireCount = Math.round(total / 7);  // 约200个橙色粒子
+    const positions = new Float32Array(total * 3);
+    const colors = new Float32Array(total * 3);
+
+    // 橙色 rgb(255,107,53) → three.js 归一化
+    const fireR = 1.0, fireG = 0.42, fireB = 0.21;
+    // 灰色
+    const grayR = 0.35, grayG = 0.35, grayB = 0.35;
+
+    for (let i = 0; i < total; i++) {
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.acos(2 * Math.random() - 1);
+      const r = 1.2 + (Math.random() - 0.5) * 0.25;
+      positions[i*3]   = r * Math.sin(phi) * Math.cos(theta);
+      positions[i*3+1] = r * Math.sin(phi) * Math.sin(theta);
+      positions[i*3+2] = r * Math.cos(phi);
+
+      // 前fireCount个粒子为橙色，其余为灰色
+      if (i < fireCount) {
+        colors[i*3] = fireR; colors[i*3+1] = fireG; colors[i*3+2] = fireB;
+      } else {
+        colors[i*3] = grayR; colors[i*3+1] = grayG; colors[i*3+2] = grayB;
+      }
+    }
+
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    const mat = new THREE.PointsMaterial({
+      size: 0.016, vertexColors: true,
+      transparent: true, opacity: 0.7, sizeAttenuation: true
+    });
+    const pts = new THREE.Points(geo, mat);
+    scene.add(pts);
+
+    function resize() {
+      const rect = canvas.parentElement.getBoundingClientRect();
+      renderer.setSize(rect.width, rect.height, false);
+      camera.aspect = rect.width / rect.height;
+      camera.updateProjectionMatrix();
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    let speed = 0.003, target = 0.003;
+    canvas.parentElement.addEventListener('mouseenter', () => target = 0.01);
+    canvas.parentElement.addEventListener('mouseleave', () => target = 0.003);
+
+    let fId;
+    function animate() {
+      fId = requestAnimationFrame(animate);
+      speed += (target - speed) * 0.05;
+      pts.rotation.y += speed;
+      pts.rotation.x += speed * 0.3;
+      renderer.render(scene, camera);
+    }
+    new IntersectionObserver(es => {
+      es.forEach(e => { e.isIntersecting ? animate() : cancelAnimationFrame(fId); });
+    }, { threshold: 0.1 }).observe(canvas.parentElement);
+  })();
+
+
+  // ── Bridge 2：内外伦敦两群粒子 ──
+  // 内圈密集（内伦敦），外圈稀疏（外伦敦）
+  // hover时外圈向外扩散，松开时收回
+  (function setupBridge2() {
+    const canvas = document.getElementById('bridge-canvas-2');
+    if (!canvas) return;
+
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setClearColor(0x000000, 0);
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(60, 2, 0.1, 1000);
+    camera.position.z = 3.5;
+
+    const innerCount = 600;  // 内伦敦粒子（密集）
+    const outerCount = 400;  // 外伦敦粒子（稀疏）
+    const total = innerCount + outerCount;
+
+    const basePositions = new Float32Array(total * 3);  // 初始位置
+    const positions = new Float32Array(total * 3);      // 当前位置
+    const colors = new Float32Array(total * 3);
+
+    // 内圈粒子：半径0.6~0.9，橙红色
+    for (let i = 0; i < innerCount; i++) {
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.acos(2 * Math.random() - 1);
+      const r = 0.6 + Math.random() * 0.3;
+      basePositions[i*3]   = r * Math.sin(phi) * Math.cos(theta);
+      basePositions[i*3+1] = r * Math.sin(phi) * Math.sin(theta);
+      basePositions[i*3+2] = r * Math.cos(phi);
+      colors[i*3] = 1.0; colors[i*3+1] = 0.42; colors[i*3+2] = 0.21; // 橙
+    }
+    // 外圈粒子：半径1.2~1.6，青绿色
+    for (let i = innerCount; i < total; i++) {
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.acos(2 * Math.random() - 1);
+      const r = 1.2 + Math.random() * 0.4;
+      basePositions[i*3]   = r * Math.sin(phi) * Math.cos(theta);
+      basePositions[i*3+1] = r * Math.sin(phi) * Math.sin(theta);
+      basePositions[i*3+2] = r * Math.cos(phi);
+      colors[i*3] = 0.306; colors[i*3+1] = 0.804; colors[i*3+2] = 0.769; // 青绿
+    }
+    positions.set(basePositions);
+
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    const mat = new THREE.PointsMaterial({
+      size: 0.018, vertexColors: true,
+      transparent: true, opacity: 0.65, sizeAttenuation: true
+    });
+    const pts = new THREE.Points(geo, mat);
+    scene.add(pts);
+
+    function resize() {
+      const rect = canvas.parentElement.getBoundingClientRect();
+      renderer.setSize(rect.width, rect.height, false);
+      camera.aspect = rect.width / rect.height;
+      camera.updateProjectionMatrix();
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    let isHovered = false;
+    let expandProgress = 0; // 0=收缩，1=完全展开
+
+    canvas.parentElement.addEventListener('mouseenter', () => isHovered = true);
+    canvas.parentElement.addEventListener('mouseleave', () => isHovered = false);
+
+    let speed = 0.002, fId;
+    function animate() {
+      fId = requestAnimationFrame(animate);
+      pts.rotation.y += speed;
+
+      // 外圈粒子扩散/收缩动画
+      expandProgress += isHovered
+        ? Math.min(0.04, 1 - expandProgress)   // hover时展开
+        : Math.max(-0.04, -expandProgress);     // 松开时收回
+
+      const posAttr = pts.geometry.attributes.position;
+      for (let i = innerCount; i < total; i++) {
+        // 外圈粒子在基础位置上额外向外移动expandProgress*0.6
+        const scale = 1 + expandProgress * 0.6;
+        posAttr.array[i*3]   = basePositions[i*3]   * scale;
+        posAttr.array[i*3+1] = basePositions[i*3+1] * scale;
+        posAttr.array[i*3+2] = basePositions[i*3+2] * scale;
+      }
+      posAttr.needsUpdate = true;
+      renderer.render(scene, camera);
+    }
+    new IntersectionObserver(es => {
+      es.forEach(e => { e.isIntersecting ? animate() : cancelAnimationFrame(fId); });
+    }, { threshold: 0.1 }).observe(canvas.parentElement);
+  })();
+
+
+  // ── Bridge 3：12月份圆形排列，7月和12月粒子更亮更大 ──
+  (function setupBridge3() {
+    const canvas = document.getElementById('bridge-canvas-3');
+    if (!canvas) return;
+
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setClearColor(0x000000, 0);
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(60, 2, 0.1, 1000);
+    camera.position.z = 3;
+
+    // 12个月份，每月一簇粒子排列在圆形上
+    const particlesPerMonth = 80;
+    const total = 12 * particlesPerMonth;
+    const positions = new Float32Array(total * 3);
+    const colors = new Float32Array(total * 3);
+    const sizes = new Float32Array(total);
+
+    // 高亮月份：7月（index 6）和12月（index 11）
+    const hotMonths = [6, 11];
+
+    for (let m = 0; m < 12; m++) {
+      // 每个月份在圆周上的角度
+      const monthAngle = (m / 12) * Math.PI * 2 - Math.PI / 2;
+      const ringRadius = 1.1;  // 圆环半径
+      const cx = ringRadius * Math.cos(monthAngle);
+      const cy = ringRadius * Math.sin(monthAngle);
+
+      const isHot = hotMonths.includes(m);
+      // 高亮月份用橙色，其他月份用黄色淡色
+      const r = isHot ? 1.0  : 0.8;
+      const g = isHot ? 0.42 : 0.7;
+      const b = isHot ? 0.21 : 0.2;
+
+      for (let p = 0; p < particlesPerMonth; p++) {
+        const idx = m * particlesPerMonth + p;
+        // 每个粒子在月份中心点周围随机分布
+        const spread = isHot ? 0.15 : 0.08; // 高亮月份粒子范围更大
+        positions[idx*3]   = cx + (Math.random() - 0.5) * spread;
+        positions[idx*3+1] = cy + (Math.random() - 0.5) * spread;
+        positions[idx*3+2] = (Math.random() - 0.5) * 0.1;
+
+        colors[idx*3] = r; colors[idx*3+1] = g; colors[idx*3+2] = b;
+        sizes[idx] = isHot ? 0.025 : 0.012; // 高亮月份粒子更大
+      }
+    }
+
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+    // 使用ShaderMaterial支持每粒子不同大小
+    // 如果Three.js r128不支持，改用统一大小
+    const mat = new THREE.PointsMaterial({
+      size: 0.016, vertexColors: true,
+      transparent: true, opacity: 0.75, sizeAttenuation: true
+    });
+    const pts = new THREE.Points(geo, mat);
+    scene.add(pts);
+
+    function resize() {
+      const rect = canvas.parentElement.getBoundingClientRect();
+      renderer.setSize(rect.width, rect.height, false);
+      camera.aspect = rect.width / rect.height;
+      camera.updateProjectionMatrix();
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    let speed = 0.002, target = 0.002, fId;
+    // 圆形缓慢旋转
+    canvas.parentElement.addEventListener('mouseenter', () => target = 0.008);
+    canvas.parentElement.addEventListener('mouseleave', () => target = 0.002);
+
+    // 高亮月份粒子的呼吸动画（脉冲效果）
+    let pulseT = 0;
+    function animate() {
+      fId = requestAnimationFrame(animate);
+      speed += (target - speed) * 0.05;
+      pts.rotation.z += speed;  // 绕z轴旋转，让圆形在平面内转动
+
+      // 脉冲：高亮月份粒子大小随时间变化
+      pulseT += 0.04;
+      mat.opacity = 0.6 + Math.sin(pulseT) * 0.15;
+
+      renderer.render(scene, camera);
+    }
+    new IntersectionObserver(es => {
+      es.forEach(e => { e.isIntersecting ? animate() : cancelAnimationFrame(fId); });
+    }, { threshold: 0.1 }).observe(canvas.parentElement);
+  })();
+}
+

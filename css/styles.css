@@ -53,6 +53,24 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text);
 .bridge-text strong { color:var(--text); }
 .bridge-q { color:var(--fire); font-style:italic; }
 
+/* bridge区域的canvas定位（加在.bridge规则下方）*/
+.bridge { position: relative; }  /* 给bridge加relative，让canvas绝对定位 */
+
+.bridge-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;          /* 在文字下方 */
+  pointer-events: none; /* 不拦截鼠标事件 */
+}
+
+/* 确保文字在canvas上方 */
+.bridge-text {
+  position: relative;
+  z-index: 1;
+}
+
 /* CHAPTER */
 .chapter { padding:5rem 2rem 4rem; max-width:1400px; margin:0 auto; }
 .chapter-header { display:flex; align-items:baseline; gap:1rem; margin-bottom:1rem; }
@@ -93,8 +111,20 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text);
 .tp-text strong { color:var(--text); }
 .tp-text em { color:var(--fire); font-style:normal; font-weight:600; }
 .big-n { font-family:var(--font-mono); font-size:1.2rem; color:var(--fire); }
-.tp-chart { flex:1; background:var(--glass); border:1px solid var(--glass-border); border-radius:12px; padding:1.5rem; min-height:320px; position:relative; }
+.tp-chart { flex:1; background:var(--glass); border:1px solid var(--glass-border); border-radius:12px; padding:1rem; min-height:240px; position:relative; }
 .tp-chart canvas, .tp-chart svg { width:100%; height:100%; }
+/* 只控制环形图的框，不影响Fire和SS的框 */
+#chart-fa-wrap {
+  height: 300px;   /* 调这个数控制高度，改小框就矮 */
+  max-width: 700px;    /* 调这个数控制宽度，改大框就宽 */
+  width: 100%;
+  padding: 0.5rem !important;     /* 调这个数控制环形图和边框的留白 */
+}
+/* 单独覆盖环形图canvas的高度，不影响其他tp-chart里的canvas */
+#chart-fa-wrap canvas {
+  width: 100%;
+  height: 100%;        /* 跟着父容器的固定height走 */
+}
 
 /* TIME SLIDER */
 .time-ctrl {
@@ -122,7 +152,15 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text);
 /* TRIPLE MAP */
 .triple-maps { display:flex; gap:0.8rem; height:400px; }
 .map-third { flex:1; display:flex; flex-direction:column; }
-.map-lbl { font-family:var(--font-head); font-size:0.8rem; color:var(--dim); margin-bottom:0.4rem; text-align:center; }
+.map-lbl { 
+  font-family: var(--font-head); 
+  font-size: 1rem;           /* 从0.8rem加大到1rem */
+  color: var(--text);        /* 从var(--dim)改为var(--text)，变亮 */
+  font-weight: 600;          /* 加粗 */
+  margin-bottom: 0.6rem; 
+  text-align: center; 
+  letter-spacing: 0.5px;
+}
 .map-box { flex:1; border-radius:12px; overflow:hidden; border:1px solid var(--glass-border); }
 .map-large { height:450px; border-radius:12px; overflow:hidden; border:1px solid var(--glass-border); }
 .single-map-wrap { margin-bottom:1rem; }

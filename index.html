@@ -43,35 +43,132 @@
     </div>
   </section>
 
-  <div class="bridge"><p class="bridge-text">Fewer than <strong>1 in 7</strong> calls is a real fire.<br><span class="bridge-q">So what are the other 6?</span></p></div>
+  <div class="bridge">
+    <canvas class="bridge-canvas" id="bridge-canvas-1"></canvas>
+    <p class="bridge-text">
+      Fewer than <strong>1 in 7</strong> calls is a real fire.
+      <br><span class="bridge-q">So what are the other 6?</span>
+    </p>
+  </div>
 
   <section id="ch1" class="chapter">
     <div class="chapter-header"><span class="ch-num">01</span><h2>What They Respond To</h2></div>
     <p class="ch-context">London Fire Brigade answers over 100,000 calls a year. The composition of those calls has fundamentally shifted since 2014: fires are declining while new demands surge. This chapter maps what, where, and how much.</p>
 
     <div class="ch-section">
-      <h3 class="ch-subtitle">The Structural Shift</h3>
+      <h3 class="ch-subtitle"> 
+        <span style="color:var(--fire); font-family:var(--font-mono); 
+               font-size:1.4rem; font-weight:700; margin-right:0.8rem;">
+          1.1</span>
+        The Structural Shift
+      </h3>
       <div class="kpi-row" id="kpi-ch1">
         <div class="kpi-card"><span class="kpi-val" data-to="1340000" data-suf="">0</span><span class="kpi-lbl">Calls (2014 to 2025)</span></div>
         <div class="kpi-card"><span class="kpi-val" data-to="14" data-suf="%">0</span><span class="kpi-lbl">Are Fires (2025)</span></div>
         <div class="kpi-card"><span class="kpi-val" data-to="41" data-suf="%">0</span><span class="kpi-lbl">Special Service</span></div>
         <div class="kpi-card"><span class="kpi-val" data-to="45" data-suf="%">0</span><span class="kpi-lbl">False Alarm</span></div>
       </div>
-      <div class="chart-box chart-wide"><canvas id="chart-yearly"></canvas></div>
+      <!-- 修改后：两个canvas并排，左图百分比堆叠，右图总量趋势 -->
+<div style="display: flex; gap: 16px; height: 280px;">
+
+  <!-- 左图：百分比堆叠（占70%宽度，展示结构性变化） -->
+  <div style="flex: 7; position: relative; display: flex; flex-direction: column;">
+    <div style="color:#666; font-size:11px; margin-bottom:6px; letter-spacing:0.05em;">
+      SHARE OF INCIDENT TYPES (%)
+    </div>
+    <div style="flex:1; position:relative;">
+      <canvas id="chart-yearly"></canvas>
+    </div>
+  </div>
+
+  <!-- 右图：总量趋势（占30%宽度，展示绝对数量） -->
+  <div style="flex: 3; position: relative; display: flex; flex-direction: column;">
+    <div style="color:#666; font-size:11px; margin-bottom:6px; letter-spacing:0.05em;">
+      TOTAL CALLS PER YEAR
+    </div>
+    <div style="flex:1; position:relative;">
+      <canvas id="chart-yearly-total"></canvas>
+    </div>
+  </div>
+
+</div>
     </div>
 
     <div class="ch-section">
-      <h3 class="ch-subtitle">Three Trajectories</h3>
+      <h3 class="ch-subtitle">
+        <span style="color:var(--fire); font-family:var(--font-mono); 
+               font-size:1.4rem; font-weight:700; margin-right:0.8rem;">
+          1.2</span>
+        Three Trajectories
+      </h3>
       <div class="traj-tabs">
         <button class="traj-tab active" data-t="fa"><span class="tt-dot dot-gray"></span><span class="tt-name">False Alarm</span></button>
         <button class="traj-tab" data-t="fire"><span class="tt-dot dot-fire"></span><span class="tt-name">Fire</span></button>
         <button class="traj-tab" data-t="ss"><span class="tt-dot dot-teal"></span><span class="tt-name">Special Service</span></button>
       </div>
       <div class="traj-panels">
-        <div class="traj-panel active" id="tp-fa">
-          <div class="tp-text"><h4>The Wasted Effort</h4><p>75% of false alarms are automatic fire alarms malfunctioning. Nearly <strong>1 in 2</strong> calls is a wasted trip.</p></div>
-          <div class="tp-chart"><canvas id="chart-fa"></canvas></div>
-        </div>
+
+<!-- 修改后：左侧大字数字+右侧缩小的环形图 -->
+<div class="traj-panel active" id="tp-fa">
+
+  <!-- 左侧：大字数字标注 -->
+  <div class="tp-text" style="display:flex; flex-direction:column; 
+       justify-content:center; gap:20px; min-width:180px;">
+
+    <div>
+      <div id="fa-stat-afa"
+           style="font-size:44px; font-weight:700; color:#ff6b35;
+                  line-height:1; font-family:'JetBrains Mono',monospace;">
+        75%
+      </div>
+      <div style="color:#aaa; font-size:12px; margin-top:5px; line-height:1.5;">
+        automatic alarm<br>malfunctions (AFA)
+      </div>
+    </div>
+
+    <div>
+      <div id="fa-stat-good"
+           style="font-size:30px; font-weight:600; color:#4ecdc4; line-height:1;">
+        21%
+      </div>
+      <div style="color:#aaa; font-size:12px; margin-top:5px;">
+        good intent calls
+      </div>
+    </div>
+
+    <div>
+      <div id="fa-stat-mal"
+           style="font-size:26px; font-weight:600; color:#ffe66d; line-height:1;">
+        2%
+      </div>
+      <div style="color:#aaa; font-size:12px; margin-top:5px;">
+        malicious false alarms
+      </div>
+    </div>
+
+    <p style="font-size:13px; color:#888; margin-top:8px;
+              border-top:1px solid #2a2a2a; padding-top:12px;">
+      Nearly <strong style="color:#ccc;">1 in 2</strong> calls is a wasted trip.
+    </p>
+
+  </div>
+
+  <!-- 右侧：环形图，撑满剩余空间，高度由父容器控制 -->
+  <!-- 去掉 max-width 限制，让图自然撑大 -->
+  <div class="tp-chart" id="chart-fa-wrap"
+     style="display:flex; 
+            align-items:center; 
+            justify-content:center;
+            padding:8px 16px;
+            box-sizing:border-box;">
+    <canvas id="chart-fa"></canvas>
+  </div>
+
+</div>
+
+
+</div>
+
         <div class="traj-panel" id="tp-fire">
           <div class="tp-text"><h4>The Decline</h4><p>Fire incidents have dropped significantly since 2014. Building regulations and smoke alarms are working. Dwelling fires dominate.</p></div>
           <div class="tp-chart"><canvas id="chart-fire-prop"></canvas></div>
@@ -84,7 +181,12 @@
     </div>
 
     <div class="ch-section">
-      <h3 class="ch-subtitle">Spatial Distribution</h3>
+      <h3 class="ch-subtitle">
+        <span style="color:var(--fire); font-family:var(--font-mono); 
+               font-size:1.4rem; font-weight:700; margin-right:0.8rem;">
+          1.3</span>
+        Spatial Distribution
+      </h3>
       <p class="ch-context">Three incident types, three completely different spatial patterns. 250m grid aggregation reveals sub-borough detail invisible at coarser scales.</p>
 
       <div class="time-ctrl">
@@ -129,22 +231,94 @@
           </div>
         </div>
       </div>
+      
+      <!-- 在 <div id="triple-hover"...> 上方加入 -->
+      <div style="display:flex; justify-content:center; align-items:center; 
+                  gap:6px; margin-top:0.8rem; margin-bottom:0.4rem;">
+       <span style="font-size:0.75rem; color:var(--dim); margin-right:8px;">
+         Incident density:
+       </span>
+       <!-- 色阶条：从深蓝到红色 -->
+       <div style="display:flex; align-items:center; gap:3px;">
+         <div style="width:80px; height:10px; border-radius:4px;
+                background:linear-gradient(90deg, 
+                  #1a1a2e 0%, #2d4a3e 20%, #4ecdc4 45%, 
+                  #ffe66d 65%, #ff6b35 82%, #ff0000 100%);"></div>
+       </div>
+       <span style="font-size:0.72rem; color:var(--dim); margin-left:4px;">Low</span>
+       <span style="font-size:0.72rem; color:var(--dim);">→</span>
+       <span style="font-size:0.72rem; color:var(--text);">High</span>
+       <span style="font-size:0.72rem; color:var(--muted); margin-left:16px;">
+         Grid: 250m × 250m · Source: LFB 2014–2025
+       </span>
+      </div>
+
       <div id="triple-hover" class="hover-info"><span class="hover-hint">Hover over a grid cell. Use the slider for time periods and the pills for sub-categories.</span></div>
     </div>
   </section>
 
-  <div class="bridge"><p class="bridge-text">Different places, different risks, different waits.<br><span class="bridge-q">Is the system keeping up?</span></p></div>
+  <div class="bridge">
+    <canvas class="bridge-canvas" id="bridge-canvas-2"></canvas>
+    <p class="bridge-text">
+      Different places, different risks, different waits.
+      <br><span class="bridge-q">Is the system keeping up?</span>
+    </p>
+  </div>
 
   <section id="ch2" class="chapter">
     <div class="chapter-header"><span class="ch-num">02</span><h2>Who Waits the Longest</h2></div>
     <p class="ch-context">Risk is shaped by both hazard and vulnerability. The 250m grid reveals where incidents concentrate; response time reveals how quickly help arrives.</p>
 
     <div class="ch-section">
-      <h3 class="ch-subtitle">Response Time Across London</h3>
+      <h3 class="ch-subtitle">
+        <span style="color:var(--fire); font-family:var(--font-mono); 
+               font-size:1.4rem; font-weight:700; margin-right:0.8rem;">
+          2.1</span>
+        Response Time Across London
+      </h3>
       <div class="single-map-wrap">
+        <!-- 在 single-map-wrap 之后加 -->
+         <div style="display:flex; gap:1.5rem; margin-top:1.5rem; align-items:flex-start;">
+            <div style="flex:1; font-size:0.8rem; color:var(--dim); line-height:1.8;">
+             <p>The <span style="color:var(--teal);">15 slowest boroughs</span> are 
+             almost exclusively in outer London, where station density is lowest.</p>
+             <p style="margin-top:0.5rem;">
+               <span style="display:inline-block; width:10px; height:10px; 
+                      border-radius:50%; background:#4ecdc4; margin-right:5px;"></span>
+               Outer London &nbsp;
+               <span style="display:inline-block; width:10px; height:10px; 
+                     border-radius:50%; background:#ff6b35; margin-right:5px;"></span>
+               Inner London
+             </p>
+          </div>
+          <div class="chart-box" style="flex:2; height:320px;">
+            <canvas id="chart-resp-rank"></canvas>
+          </div>
+        </div>
+
         <div class="map-lbl"><span class="lbl-dot dot-teal"></span> First Pump Attendance Time (250m grid, all incident types)</div>
         <div id="map-response" class="map-box map-large"></div>
         <div class="map-ctrl-row">
+          <!-- 在 <div class="map-ctrl-row"> 下方加入 -->
+          <div style="display:flex; justify-content:space-between; align-items:center; 
+            margin-top:0.8rem; flex-wrap:wrap; gap:8px;">
+  
+            <!-- 左侧：色阶条 -->
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span style="font-size:0.75rem; color:var(--dim);">Faster response</span>
+              <div style="width:120px; height:10px; border-radius:4px;
+                          background:linear-gradient(90deg,
+                            #1a1a2e 0%, #2d4a3e 20%, #4ecdc4 45%,
+                            #ffe66d 65%, #ff6b35 82%, #ff0000 100%);"></div>
+               <span style="font-size:0.75rem; color:var(--text);">Slower response</span>
+            </div>
+
+            <!-- 右侧：数据来源说明 -->
+            <span style="font-size:0.72rem; color:var(--muted);">
+              250m × 250m grid · Avg first pump attendance time · LFB 2014–2025
+            </span>
+
+</div>
           <div id="resp-hover" class="hover-info" style="flex:1"><span class="hover-hint">Hover grid for response time</span></div>
           <button id="station-toggle" class="pill" style="--pill-c:#ffffff; white-space:nowrap;">Show Fire Stations</button>
         </div>
@@ -152,13 +326,67 @@
     </div>
 
     <div class="ch-section">
-      <h3 class="ch-subtitle">The Danger Zone</h3>
+      <h3 class="ch-subtitle">
+        <span style="color:var(--fire); font-family:var(--font-mono); 
+               font-size:1.4rem; font-weight:700; margin-right:0.8rem;">
+          2.2</span>
+        The Danger Zone
+      </h3>
       <p class="ch-context">Boroughs where special service demand is growing fastest are often those where the fire service takes longest to arrive.</p>
       <div class="chart-box chart-scatter"><svg id="scatter-plot"></svg></div>
+      <!-- 在 chart-scatter 的 div 下方加入 -->
+<div class="ch-section">
+  <h3 class="ch-subtitle">
+    <span class="ch-num" style="font-size:1.4rem; opacity:0.6; margin-right:0.6rem;">
+      2.2b
+    </span>
+    Growth vs Response: Borough Comparison
+  </h3>
+  <p class="ch-context">
+    Boroughs sorted by Special Service growth rate (left = fastest growing).
+    Outer London boroughs (teal) dominate the high-growth end and also have
+    the longest response times.
+  </p>
+
+  <!-- 图例 -->
+  <div style="display:flex; gap:20px; margin-bottom:1rem;">
+    <div style="display:flex; align-items:center; gap:6px;">
+      <div style="width:12px; height:12px; border-radius:50%; 
+                  background:rgba(78,205,196,0.75);"></div>
+      <span style="font-size:0.8rem; color:#ccc;">Outer London</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:6px;">
+      <div style="width:12px; height:12px; border-radius:50%; 
+                  background:rgba(255,107,53,0.75);"></div>
+      <span style="font-size:0.8rem; color:#ccc;">Inner London</span>
+    </div>
+  </div>
+
+  <!-- 上图：增长率 -->
+  <div class="chart-box" style="height:180px; margin-bottom:4px;">
+    <canvas id="chart-dual-growth"></canvas>
+  </div>
+
+  <!-- 上下图之间的连接说明 -->
+  <div style="text-align:center; font-size:0.75rem; color:var(--dim); 
+              padding:4px 0; letter-spacing:0.5px;">
+    ↑ Same borough order in both charts ↓
+  </div>
+
+  <!-- 下图：响应时间 -->
+  <div class="chart-box" style="height:220px;">
+    <canvas id="chart-dual-resp"></canvas>
+  </div>
+</div>
     </div>
 
     <div class="ch-section">
-      <h3 class="ch-subtitle">The Outward Shift</h3>
+      <h3 class="ch-subtitle">
+        <span style="color:var(--fire); font-family:var(--font-mono); 
+               font-size:1.4rem; font-weight:700; margin-right:0.8rem;">
+          2.3</span>
+        The Outward Shift
+      </h3>
       <p class="ch-context">Across all three incident types, outer London is growing faster than inner London. The indexed chart below (2014 = 100) makes the divergence clear.</p>
       <div class="inout-tabs">
         <button class="pill active" data-io="all">All Types</button>
@@ -174,7 +402,12 @@
     </div>
 
     <div class="ch-section">
-      <h3 class="ch-subtitle">Deprivation and Fire Risk</h3>
+      <h3 class="ch-subtitle">
+        <span style="color:var(--fire); font-family:var(--font-mono); 
+               font-size:1.4rem; font-weight:700; margin-right:0.8rem;">
+          2.4</span>
+        Deprivation and Fire Risk
+      </h3>
       <div class="split-row">
         <div class="chart-box split-chart"><canvas id="chart-quartile"></canvas></div>
         <div class="split-text">
@@ -185,16 +418,98 @@
         </div>
       </div>
     </div>
-  </section>
+</section>
 
-  <div class="bridge"><p class="bridge-text">Different emergencies follow<br><strong>completely different seasonal clocks</strong>.</p></div>
+  <!-- 双变量地图单独放在chapter容器内，保证居中对齐 -->
+  <div class="chapter" style="padding-top:2rem; max-width:1400px; margin:0 auto; padding-left:2rem; padding-right:2rem;">
+    <div class="ch-section">
+      <h3 class="ch-subtitle">
+        <span class="ch-num" style="font-size:1.4rem; opacity:0.6; margin-right:0.6rem;">2.5</span>
+        Fire Risk × Response Time: Borough-Level Pattern
+      </h3>
+      <p class="ch-context">
+        Each borough is classified by both fire rate and average response time.
+        Purple boroughs face the worst combination: high fire risk and slow response.
+      </p>
+
+      <div style="display:flex; gap:2rem; align-items:flex-start; margin-top:1.5rem;">
+        
+        <!-- 左侧：双变量地图 -->
+        <div style="flex:1; min-width:0;">
+          <div id="map-bivariate" 
+               style="height:420px; width:100%;
+                      border-radius:12px; overflow:hidden; 
+                      border:1px solid var(--glass-border);">
+          </div>
+          <div id="biv-hover" class="hover-info" style="margin-top:0.6rem;">
+            <span class="hover-hint">Hover a borough to see details</span>
+          </div>
+        </div>
+
+        <!-- 右侧：9色矩阵图例 -->
+        <div style="flex:0 0 200px; padding-left:8px;">
+          <div style="font-size:0.8rem; color:var(--dim); margin-bottom:12px; font-weight:600;">How to read:</div>
+          <div style="font-size:0.7rem; color:var(--dim); margin-bottom:4px; padding-left:20px;">↑ Fast response</div>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <div style="writing-mode:vertical-rl; transform:rotate(180deg); font-size:0.65rem; color:var(--dim); text-align:center; width:14px;">Response time</div>
+            <div>
+              <div style="display:grid; grid-template-columns:repeat(3,32px); grid-template-rows:repeat(3,24px); gap:2px;">
+                <div style="background:#be64ac; border-radius:2px;"></div>
+                <div style="background:#8c62aa; border-radius:2px;"></div>
+                <div style="background:#3b4994; border-radius:2px;"></div>
+                <div style="background:#dfb0d6; border-radius:2px;"></div>
+                <div style="background:#a5add3; border-radius:2px;"></div>
+                <div style="background:#5698b9; border-radius:2px;"></div>
+                <div style="background:#e8e8e8; border-radius:2px;"></div>
+                <div style="background:#ace4e4; border-radius:2px;"></div>
+                <div style="background:#5ac8c8; border-radius:2px;"></div>
+              </div>
+              <div style="display:flex; justify-content:space-between; width:98px; margin-top:4px;">
+                <span style="font-size:0.65rem; color:var(--dim);">Low fire</span>
+                <span style="font-size:0.65rem; color:var(--dim);">High fire</span>
+              </div>
+            </div>
+          </div>
+          <div style="font-size:0.7rem; color:var(--dim); margin-top:4px; padding-left:20px;">↓ Slow response</div>
+          <div style="margin-top:16px; display:flex; flex-direction:column; gap:8px;">
+            <div style="display:flex; align-items:flex-start; gap:8px;">
+              <div style="width:14px; height:14px; border-radius:2px; background:#3b4994; flex-shrink:0; margin-top:1px;"></div>
+              <span style="font-size:0.72rem; color:#ccc; line-height:1.4;">High fire risk<br>+ slow response</span>
+            </div>
+            <div style="display:flex; align-items:flex-start; gap:8px;">
+              <div style="width:14px; height:14px; border-radius:2px; background:#5ac8c8; flex-shrink:0; margin-top:1px;"></div>
+              <span style="font-size:0.72rem; color:#ccc; line-height:1.4;">Low fire risk<br>+ fast response</span>
+            </div>
+          </div>
+          <div style="margin-top:16px; font-size:0.68rem; color:var(--muted); line-height:1.5; border-top:1px solid var(--glass-border); padding-top:10px;">
+            Fire rate: total fires ÷ population × 1,000<br>
+            Response: avg first pump attendance (s)<br>
+            Source: LFB 2014–2025
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="bridge">
+    <canvas class="bridge-canvas" id="bridge-canvas-3"></canvas>
+    <p class="bridge-text">
+      Different emergencies follow
+      <br><strong>completely different seasonal clocks</strong>.
+    </p>
+  </div>
 
   <section id="ch3" class="chapter">
     <div class="chapter-header"><span class="ch-num">03</span><h2>When Emergencies Strike</h2></div>
     <p class="ch-context">Fire services typically plan for a flat demand curve, but the monthly data reveals overlapping seasonal peaks across incident types. Scroll through each one to see when its calls cluster.</p>
 
     <div class="ch-section">
-      <h3 class="ch-subtitle">The Seasonal Landscape</h3>
+      <h3 class="ch-subtitle">
+        <span style="color:var(--fire); font-family:var(--font-mono); 
+               font-size:1.4rem; font-weight:700; margin-right:0.8rem;">3.1</span>
+        The Seasonal Landscape
+      </h3>
       <div class="chart-box chart-wide"><canvas id="chart-monthly-all"></canvas></div>
     </div>
 
@@ -203,12 +518,50 @@
         <canvas id="chart-monthly-focus"></canvas>
       </div>
       <div class="scrolly-steps">
-        <div class="step" data-step="outdoor"><div class="step-card sc-fire"><h3>Outdoor Fire</h3><p>Peaks in July at <strong>9,366</strong> incidents, over <strong>4×</strong> the December low of 2,112. Dry weather and vegetation drive the summer surge.</p></div></div>
-        <div class="step" data-step="dwelling"><div class="step-card sc-fire"><h3>Dwelling Fire</h3><p>Remarkably flat across the year, varying only between 4,800 and 5,500 per month. Residential fires are a constant, year-round risk.</p></div></div>
-        <div class="step" data-step="flooding"><div class="step-card sc-teal"><h3>Flooding</h3><p>Bimodal: a winter peak in December (8,598) and a smaller summer peak in July (8,440). Storm seasons at both ends of the year overlap with the outdoor fire surge.</p></div></div>
-        <div class="step" data-step="entry"><div class="step-card sc-teal"><h3>Forced Entry</h3><p>Highest in December (9,774), with a secondary summer peak (9,721 in July). The amplitude is modest, around 30% between low and high months.</p></div></div>
-        <div class="step" data-step="assist"><div class="step-card sc-yellow"><h3>Agency Assist</h3><p>After a February dip, the trend rises through the year and peaks in December at <strong>2,503</strong>, 41% above the February low. Inter-agency demand concentrates in winter.</p></div></div>
-        <div class="step" data-step="collision"><div class="step-card sc-contrast"><h3>The Temporal Collision</h3><p>July stacks an outdoor fire surge on top of summer flooding while forced entries stay near their annual peak. December delivers the same pile-up: flooding, forced entries, and agency assists all peak together. A flat staffing model has no slack for either month.</p></div></div>
+        <div class="step" data-step="overview">
+          <div class="step-card sc-contrast">
+            <h3>Five Seasonal Signals</h3>
+            <p>Each incident type follows its own seasonal rhythm. 
+               Scroll to see them one by one — then watch what 
+               happens when they collide.</p>
+          </div>
+        </div>
+        <div class="step" data-step="outdoor">
+          <div class="step-card sc-fire">
+            <h3>Outdoor Fire</h3>
+            <p>Peaks in July at <strong>9,366</strong> incidents, over <strong>4×</strong> the December low of 2,112. Dry weather and vegetation drive the summer surge.</p>
+          </div>
+        </div>
+        <div class="step" data-step="dwelling">
+          <div class="step-card sc-fire">
+            <h3>Dwelling Fire</h3>
+            <p>Remarkably flat across the year, varying only between 4,800 and 5,500 per month. Residential fires are a constant, year-round risk.</p>
+          </div>
+        </div>
+        <div class="step" data-step="flooding">
+          <div class="step-card sc-teal">
+            <h3>Flooding</h3>
+            <p>Bimodal: a winter peak in December (8,598) and a smaller summer peak in July (8,440). Storm seasons at both ends of the year overlap with the outdoor fire surge.</p>
+          </div>
+        </div>
+        <div class="step" data-step="entry">
+          <div class="step-card sc-teal">
+            <h3>Forced Entry</h3>
+            <p>Highest in December (9,774), with a secondary summer peak (9,721 in July). The amplitude is modest, around 30% between low and high months.</p>
+          </div>
+        </div>
+        <div class="step" data-step="assist">
+          <div class="step-card sc-yellow">
+            <h3>Agency Assist</h3>
+            <p>After a February dip, the trend rises through the year and peaks in December at <strong>2,503</strong>, 41% above the February low. Inter-agency demand concentrates in winter.</p>
+          </div>
+        </div>
+        <div class="step" data-step="collision">
+          <div class="step-card sc-contrast">
+            <h3>The Temporal Collision</h3>
+            <p>July stacks an outdoor fire surge on top of summer flooding while forced entries stay near their annual peak. December delivers the same pile-up: flooding, forced entries, and agency assists all peak together. A flat staffing model has no slack for either month.</p>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -236,6 +589,7 @@
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
   <script src="https://unpkg.com/scrollama@3.2.0/build/scrollama.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>
