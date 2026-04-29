@@ -28,9 +28,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   initTripleMaps();
   initResponseMap();
-  createChartResponseRanking();
   initScatterPlot();
-  createChartDualPanel();
   createBivariateMap();
   initScrollytelling();
 
@@ -730,7 +728,259 @@ async function initResponseMap() {
       document.getElementById('resp-hover').innerHTML = '<span class="hover-hint">Hover grid for response time. White dots are fire stations.</span>';
     });
   });
-  new IntersectionObserver(e => { e.forEach(x => { if (x.isIntersecting) mapResp?.resize(); }); }, { threshold: 0.1 }).observe(document.getElementById('map-response'));
+
+  // 地图resize观察
+  new IntersectionObserver(e => { 
+    e.forEach(x => { if (x.isIntersecting) mapResp?.resize(); }); 
+  }, { threshold: 0.1 }).observe(document.getElementById('map-response'));
+
+  // ── 问题二修复：鼠标离开地图时恢复默认提示文字 ──
+  // 覆盖之前的mouseleave，确保离开时重置
+  mapResp.on('mouseleave', 'grid-fill', () => {
+    mapResp.getCanvas().style.cursor = '';
+    document.getElementById('resp-hover').innerHTML =
+      '<span class="hover-hint">Hover over the map to see response time data.</span>';
+  });
+
+  // ── 问题一：拖拽调整面板宽度 ──
+  const panel = document.getElementById('resp-panel');
+  const handle = document.getElementById('resp-resize-handle');
+  const mapContainer = document.getElementById('map-response');
+
+  let isDragging = false;
+  let startX = 0;
+  let startWidth = 0;
+
+  handle.addEventListener('mousedown', e => {
+    isDragging = true;
+    startX = e.clientX;
+    startWidth = panel.offsetWidth;
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', e => {
+    if (!isDragging) return;
+    const dx = e.clientX - startX;
+    const newWidth = Math.max(200, Math.min(startWidth + dx, 
+      panel.parentElement.offsetWidth * 0.85));
+    panel.style.width = newWidth + 'px';
+    // 面板变宽时触发内容重新渲染，更新柱状图宽度
+    renderPanel(currentRespTab, 
+      document.getElementById('resp-search-input')?.value || '');
+    mapResp?.resize();
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (isDragging) {
+      isDragging = false;
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    }
+  });
+
+  // ── 左侧操作面板逻辑 ──
+  const innerBoroughs = ['Camden','City of London','Greenwich','Hackney',
+    'Hammersmith and Fulham','Islington','Kensington and Chelsea',
+    'Lambeth','Lewisham','Newham','Southwark','Tower Hamlets',
+    'Wandsworth','Westminster','Haringey'];
+
+  const allBoroughStats = Object.entries(DATA.boroughData)
+    .map(([name, d]) => ({
+      name,
+      resp: d.avgResponseSec,
+      growth: d.ssGrowth,
+      isInner: innerBoroughs.includes(name)
+    }))
+    .sort((a, b) => b.resp - a.resp);
+
+  // 响应时间最大最小值，用于柱状图比例计算
+  const respMax = allBoroughStats[0].resp;
+  const respMin = allBoroughStats[allBoroughStats.length - 1].resp;
+  const growthMax = Math.max(...allBoroughStats.map(b => b.growth));
+
+  // ── 问题四：根据面板宽度决定显示模式 ──
+  // 宽度 > 380px 时显示四列+柱状图，否则显示紧凑两列
+  function isWideMode() {
+    return panel.offsetWidth > 380;
+  }
+
+  // 生成单行HTML（根据宽度模式）
+  function makeRowHtml(b, rank, colorOverride) {
+    const color = colorOverride || (b.isInner ? '#ff6b35' : '#4ecdc4');
+    const wide = isWideMode();
+
+    const respBarW = Math.round(((b.resp - respMin) / (respMax - respMin)) * 100);
+    const growthBarW = Math.round((b.growth / growthMax) * 100);
+
+    if (wide) {
+      // 宽模式：前两列固定，后两列各占剩余的一半（自适应宽度）
+      return `
+        <div style="display:grid; grid-template-columns:22px minmax(80px,1.5fr) 1fr 1fr; 
+                    gap:6px; padding:6px 4px; align-items:center;
+                    border-bottom:1px solid rgba(255,255,255,0.04);">
+          <span style="font-size:0.65rem; color:var(--muted); text-align:center;">${rank}</span>
+          <div style="min-width:0;">
+            <div style="display:flex; align-items:center; gap:4px;">
+              <span style="width:6px; height:6px; border-radius:50%; 
+                           background:${color}; flex-shrink:0;"></span>
+              <span style="font-size:0.72rem; color:var(--text); 
+                           white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                ${b.name}
+              </span>
+            </div>
+            <div style="font-size:0.62rem; color:var(--muted);">${b.isInner ? 'Inner' : 'Outer'}</div>
+          </div>
+          <div style="min-width:0;">
+            <div style="font-size:0.72rem; color:${color}; font-family:var(--font-mono); margin-bottom:3px;">${b.resp}s</div>
+            <div style="height:5px; border-radius:2px; background:rgba(255,255,255,0.06); overflow:hidden; width:100%;">
+              <div style="width:${respBarW}%; height:100%; background:${color}; border-radius:2px; transition:width 0.3s;"></div>
+            </div>
+          </div>
+          <div style="min-width:0;">
+            <div style="font-size:0.72rem; color:var(--dim); font-family:var(--font-mono); margin-bottom:3px;">+${b.growth}%</div>
+            <div style="height:5px; border-radius:2px; background:rgba(255,255,255,0.06); overflow:hidden; width:100%;">
+              <div style="width:${growthBarW}%; height:100%; background:rgba(78,205,196,0.6); border-radius:2px; transition:width 0.3s;"></div>
+            </div>
+          </div>
+        </div>`;
+    } else {
+      return `
+        <div style="display:flex; align-items:center; gap:6px; padding:5px 4px; 
+                    border-bottom:1px solid rgba(255,255,255,0.04);">
+          <span style="font-size:0.65rem; color:var(--muted); width:18px; flex-shrink:0; text-align:center;">${rank}</span>
+          <span style="width:6px; height:6px; border-radius:50%; 
+                       background:${color}; flex-shrink:0;"></span>
+          <div style="flex:1; min-width:0;">
+            <div style="font-size:0.72rem; color:var(--text); 
+                        white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${b.name}</div>
+            <div style="font-size:0.62rem; color:var(--muted);">${b.isInner ? 'Inner' : 'Outer'}</div>
+          </div>
+          <div style="text-align:right; flex-shrink:0;">
+            <div style="font-size:0.72rem; color:${color}; font-family:var(--font-mono);">${b.resp}s</div>
+            <div style="font-size:0.65rem; color:var(--dim);">+${b.growth}%</div>
+          </div>
+        </div>`;
+    }
+  } 
+
+  // 渲染面板内容
+  function renderPanel(tab, searchVal = '') {
+    const content = document.getElementById('resp-panel-content');
+    const searchBox = document.getElementById('resp-search-box');
+    if (!content) return;
+
+    const wide = isWideMode();
+
+    // 宽模式下显示列标题
+    const wideHeader = wide ? `
+      <div style="display:grid; grid-template-columns:22px minmax(80px,1.5fr) 1fr 1fr; 
+                  gap:6px; padding:4px 4px 6px; border-bottom:1px solid rgba(255,255,255,0.08);">
+        <span style="font-size:0.62rem; color:var(--muted);"></span>
+        <span style="font-size:0.62rem; color:var(--muted); letter-spacing:0.4px;">BOROUGH</span>
+        <span style="font-size:0.62rem; color:var(--muted); letter-spacing:0.4px;">RESP TIME ▼</span>
+        <span style="font-size:0.62rem; color:var(--muted); letter-spacing:0.4px;">SS GROWTH</span>
+      </div>` : `
+      <div style="font-size:0.68rem; color:var(--dim); padding:4px 4px 6px;">
+        BOROUGH &nbsp;&nbsp; RESP &nbsp; GROWTH
+      </div>`;
+
+    if (tab === 'top10') {
+      searchBox.style.display = 'none';
+      const rows = allBoroughStats.slice(0, 10);
+      content.innerHTML = wideHeader +
+        rows.map((b, i) => makeRowHtml(b, i + 1, '#ff6b35')).join('');
+
+    } else if (tab === 'bot10') {
+      searchBox.style.display = 'none';
+      const rows = [...allBoroughStats].slice(-10).reverse();
+      content.innerHTML = wideHeader +
+        rows.map((b, i) => makeRowHtml(b, i + 1, '#4ecdc4')).join('');
+
+    } else if (tab === 'search') {
+      searchBox.style.display = 'block';
+      const q = (searchVal || '').toLowerCase().trim();
+      if (!q) {
+        content.innerHTML = `<div style="font-size:0.75rem; color:var(--muted); padding:12px 4px;">
+          Type a borough name above to search.</div>`;
+        return;
+      }
+      const results = allBoroughStats.filter(b => b.name.toLowerCase().includes(q));
+      if (!results.length) {
+        content.innerHTML = `<div style="font-size:0.75rem; color:var(--muted); padding:12px 4px;">
+          No borough found.</div>`;
+        return;
+      }
+      content.innerHTML = wideHeader +
+        results.map(b => {
+          const rank = allBoroughStats.findIndex(x => x.name === b.name) + 1;
+          return makeRowHtml(b, '#' + rank, null);
+        }).join('');
+
+    } else if (tab === 'stations') {
+      searchBox.style.display = 'none';
+      content.innerHTML = `<div style="font-size:0.75rem; color:var(--dim); padding:12px 4px; line-height:1.7;">
+        <strong style="color:var(--text);">102 Fire Stations</strong> across London.<br><br>
+        White dots show station locations. Station density is highest in inner London — 
+        this explains why deprived inner-city wards get faster responses despite higher fire rates.
+        <br><br>
+        <span style="font-size:0.68rem; color:var(--muted);">Zoom in to see station names.</span>
+      </div>`;
+    }
+  }
+
+  // ── 问题三修复：消防站按钮逻辑 ──
+  // 等地图load完成后再绑定，避免getLayoutProperty在load前调用报错
+  // station-toggle 的事件改在这里统一管理，避免和map.on('load')内的重复绑定冲突
+  const stationToggleBtn = document.getElementById('station-toggle');
+  let stationsVisible = false; // 用变量追踪状态，避免依赖getLayoutProperty时序问题
+
+  if (stationToggleBtn) {
+    // 移除旧的事件监听（如果有），重新绑定
+    const newBtn = stationToggleBtn.cloneNode(true);
+    stationToggleBtn.parentNode.replaceChild(newBtn, stationToggleBtn);
+
+    newBtn.addEventListener('click', () => {
+      // 确保地图已加载
+      if (!mapResp.getLayer('station-dots')) return;
+      stationsVisible = !stationsVisible;
+      mapResp.setLayoutProperty('station-dots', 'visibility', stationsVisible ? 'visible' : 'none');
+      mapResp.setLayoutProperty('station-labels', 'visibility', stationsVisible ? 'visible' : 'none');
+      newBtn.style.background = stationsVisible ? 'rgba(255,255,255,0.15)' : 'var(--glass)';
+      newBtn.style.color = stationsVisible ? 'var(--text)' : 'var(--dim)';
+      newBtn.textContent = stationsVisible ? '📍 Hide Fire Stations' : '📍 Show Fire Stations';
+      renderPanel('stations');
+    });
+  }
+
+  // Tab切换逻辑
+  let currentRespTab = 'top10';
+  renderPanel('top10');
+
+  document.querySelectorAll('.resp-tab-btn').forEach(btn => {
+    if (btn.id === 'station-toggle') return; // station-toggle已单独处理
+    btn.addEventListener('click', () => {
+      const tab = btn.dataset.tab;
+      currentRespTab = tab;
+      document.querySelectorAll('.resp-tab-btn').forEach(b => {
+        if (b.id === 'station-toggle') return;
+        b.style.background = 'var(--glass)';
+        b.style.color = 'var(--dim)';
+      });
+      btn.style.background = 'rgba(255,107,53,0.15)';
+      btn.style.color = 'var(--fire)';
+      renderPanel(tab);
+    });
+  });
+
+  // 搜索框输入监听
+  const searchInput = document.getElementById('resp-search-input');
+  if (searchInput) {
+    searchInput.addEventListener('input', () => {
+      renderPanel('search', searchInput.value);
+    });
+  }
 }
 
 // borough级响应时间排名横向柱状图
@@ -844,121 +1094,6 @@ function initScatterPlot() {
   });
 }
 
-function createChartDualPanel() {
-  const inner = ['Camden','City of London','Greenwich','Hackney',
-    'Hammersmith and Fulham','Islington','Kensington and Chelsea',
-    'Lambeth','Lewisham','Newham','Southwark','Tower Hamlets',
-    'Wandsworth','Westminster','Haringey'];
-
-  // 按SS增长率降序排列所有borough
-  const sorted = Object.entries(DATA.boroughData)
-    .filter(([, d]) => d.ssGrowth > 0)
-    .map(([name, d]) => ({
-      name,
-      growth: d.ssGrowth,
-      resp: d.avgResponseSec,
-      isInner: inner.includes(name)
-    }))
-    .sort((a, b) => b.growth - a.growth);
-
-  const labels = sorted.map(d => d.name);
-  const colors = sorted.map(d =>
-    d.isInner ? 'rgba(255,107,53,0.75)' : 'rgba(78,205,196,0.75)'
-  );
-
-  // ── 上图：SS增长率 ──
-  killChart('dualGrowth');
-  charts.dualGrowth = new Chart(
-    document.getElementById('chart-dual-growth'), {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [{
-        label: 'SS Growth Rate (%)',
-        data: sorted.map(d => d.growth),
-        backgroundColor: colors,
-        borderRadius: 2
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: {
-            label: ctx => ` SS growth: +${ctx.parsed.y}%`,
-            afterLabel: ctx => sorted[ctx.dataIndex].isInner
-              ? 'Inner London' : 'Outer London'
-          }
-        }
-      },
-      scales: {
-        x: {
-          grid: { display: false },
-          ticks: { display: false }  // x轴标签只在下图显示，避免重复
-        },
-        y: {
-          grid: { color: C.grid },
-          ticks: { color: C.tick, callback: v => v + '%' },
-          title: {
-            display: true,
-            text: 'SS Growth Rate 2014–2025 (%)',
-            color: C.tick, font: { size: 10 }
-          }
-        }
-      }
-    }
-  });
-
-  // ── 下图：平均响应时间 ──
-  killChart('dualResp');
-  charts.dualResp = new Chart(
-    document.getElementById('chart-dual-resp'), {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [{
-        label: 'Avg Response Time (s)',
-        data: sorted.map(d => d.resp),
-        backgroundColor: colors,
-        borderRadius: 2
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: {
-            label: ctx => ` Avg response: ${ctx.parsed.y}s`,
-            afterLabel: ctx => sorted[ctx.dataIndex].isInner
-              ? 'Inner London' : 'Outer London'
-          }
-        }
-      },
-      scales: {
-        x: {
-          grid: { display: false },
-          ticks: {
-            color: '#aaa', font: { size: 9 },
-            maxRotation: 45, minRotation: 30
-          }
-        },
-        y: {
-          grid: { color: C.grid },
-          ticks: { color: C.tick, callback: v => v + 's' },
-          min: 260,
-          title: {
-            display: true,
-            text: 'Avg First Pump Attendance (s)',
-            color: C.tick, font: { size: 10 }
-          }
-        }
-      }
-    }
-  });
-}
-
 // 索引化辅助函数
 // 将绝对数量数组转换为以第一个值为基准100的指数
 // 用于内外伦敦对比图，消除绝对数量差异，突出增长率变化
@@ -1038,54 +1173,76 @@ function createChartQuartile() {
   });
 }
 
-// borough级别IMD/火灾发生的双变量分析图
-function createBivariateMap() {
-  // 需要london_boroughs.json里有IMD数据
-  // 由于现有boroughs.json只有name和color字段，需要手动加入IMD数据
-  
-  // 从fire_data.json的boroughData提取数据
-  // 用totalFire/population算每千人火灾率，用ssGrowth近似代表压力
-  const boroughStats = Object.entries(DATA.boroughData).map(([name, d]) => ({
-    name,
-    fireRate: (d.totalFire / d.population * 1000).toFixed(2),
-    responseTime: d.avgResponseSec
-  }));
+// Grid级别IMD/火灾发生的双变量分析图
+async function createBivariateMap() {
+  // 并行加载两个数据文件
+  const [gridImd, gridFire, boroughs] = await Promise.all([
+    fetch('data/grid_imd.json').then(r => r.json()),
+    fetch('data/grid_fire.json').then(r => r.json()),
+    fetch('data/london_boroughs.json').then(r => r.json()),
+  ]);
 
-  // 9色双变量矩阵（3×3）
-  // x轴：火灾率（低/中/高），y轴：响应时间（快/中/慢）
-  const bivColors = {
-    '1-1': '#e8e8e8', '2-1': '#ace4e4', '3-1': '#5ac8c8',
-    '1-2': '#dfb0d6', '2-2': '#a5add3', '3-2': '#5698b9',
-    '1-3': '#be64ac', '2-3': '#8c62aa', '3-3': '#3b4994'
-  };
-
-  // 计算分位（三分位）
-  const fireRates = boroughStats.map(d => parseFloat(d.fireRate)).sort((a,b)=>a-b);
-  const respTimes = boroughStats.map(d => d.responseTime).sort((a,b)=>a-b);
-  const fireQ = [
-    fireRates[Math.floor(fireRates.length * 0.33)],
-    fireRates[Math.floor(fireRates.length * 0.66)]
-  ];
-  const respQ = [
-    respTimes[Math.floor(respTimes.length * 0.33)],
-    respTimes[Math.floor(respTimes.length * 0.66)]
-  ];
-
-  function getClass(val, breaks) {
-    if (val <= breaks[0]) return 1;
-    if (val <= breaks[1]) return 2;
-    return 3;
-  }
-
-  // 给每个borough赋予双变量颜色
-  const colorMap = {};
-  boroughStats.forEach(d => {
-    const fx = getClass(parseFloat(d.fireRate), fireQ);
-    const ry = getClass(d.responseTime, respQ);
-    colorMap[d.name] = bivColors[`${fx}-${ry}`];
+  // 建立格子坐标 → 火灾数量的查找表
+  // 用SW角坐标做key（保留4位小数）
+  const fireMap = {};
+  gridFire.features.forEach(f => {
+    const sw = f.geometry.coordinates[0][0];
+    const key = `${sw[0].toFixed(4)},${sw[1].toFixed(4)}`;
+    fireMap[key] = f.properties.t || 0;
   });
 
-  // 初始化地图
+  // 把火灾数量合并到imd格子里
+  let maxFire = 0;
+  gridImd.features.forEach(f => {
+    const sw = f.geometry.coordinates[0][0];
+    const key = `${sw[0].toFixed(4)},${sw[1].toFixed(4)}`;
+    f.properties.fire = fireMap[key] || 0;
+    if (f.properties.fire > maxFire) maxFire = f.properties.fire;
+  });
+
+  // 火灾数量三分位断点（用于双变量分类）
+  const fireVals = gridImd.features
+    .map(f => f.properties.fire)
+    .filter(v => v > 0)
+    .sort((a, b) => a - b);
+  const fireQ1 = fireVals[Math.floor(fireVals.length * 0.33)];
+  const fireQ2 = fireVals[Math.floor(fireVals.length * 0.66)];
+
+  // 双变量9色矩阵
+  // x轴：火灾密度（低/中/高），y轴：IMD贫困程度（低/中/高）
+  const bivColors = {
+    '1-1': '#e8e8e8',  // 低火灾 + 低贫困
+    '2-1': '#ace4e4',
+    '3-1': '#5ac8c8',  // 高火灾 + 低贫困
+    '1-2': '#dfb0d6',
+    '2-2': '#a5add3',
+    '3-2': '#5698b9',
+    '1-3': '#be64ac',
+    '2-3': '#8c62aa',
+    '3-3': '#3b4994',  // 高火灾 + 高贫困（最值得关注）
+  };
+
+  // 给每个格子计算双变量颜色
+  gridImd.features.forEach(f => {
+    const p = f.properties;
+    if (!p.imd_q || p.fire === undefined) {
+      p.bivColor = '#1a1a2e';
+      return;
+    }
+    // 火灾密度分类（1=低，3=高）
+    const fClass = p.fire === 0 ? 1
+      : p.fire <= fireQ1 ? 1
+      : p.fire <= fireQ2 ? 2
+      : 3;
+    // IMD分类：imd_q已经是1-4，合并为1-3
+    const iClass = p.imd_q <= 1 ? 1
+      : p.imd_q <= 2 ? 1
+      : p.imd_q <= 3 ? 2
+      : 3;
+    p.bivColor = bivColors[`${fClass}-${iClass}`] || '#333';
+  });
+
+  // 初始化Mapbox地图
   const mapBiv = new mapboxgl.Map({
     container: 'map-bivariate',
     style: 'mapbox://styles/mapbox/dark-v11',
@@ -1093,83 +1250,46 @@ function createBivariateMap() {
     interactive: true, attributionControl: false
   });
 
-  mapBiv.on('load', async () => {
-    const boroughs = await fetch('data/london_boroughs.json').then(r => r.json());
-
-    // 给每个borough feature加入颜色属性
-    boroughs.features.forEach(f => {
-      f.properties.bivColor = colorMap[f.properties.name] || '#333';
-    });
-
+  mapBiv.on('load', () => {
+    mapBiv.addSource('grid-imd', { type: 'geojson', data: gridImd });
     mapBiv.addSource('boroughs-biv', { type: 'geojson', data: boroughs });
+
+    // 双变量填充图层
     mapBiv.addLayer({
-      id: 'biv-fill', type: 'fill', source: 'boroughs-biv',
+      id: 'biv-fill', type: 'fill', source: 'grid-imd',
       paint: {
         'fill-color': ['get', 'bivColor'],
-        'fill-opacity': 0.8
+        'fill-opacity': 0.85
       }
-    });
-    mapBiv.addLayer({
-      id: 'biv-line', type: 'line', source: 'boroughs-biv',
-      paint: { 'line-color': 'rgba(255,255,255,0.3)', 'line-width': 0.8 }
     });
 
-    // borough名称标签
+    // borough边界线
     mapBiv.addLayer({
-      id: 'biv-labels', type: 'symbol', source: 'boroughs-biv',
-      layout: {
-        'text-field': ['get', 'name'],
-        'text-size': 9, 'text-anchor': 'center'
-      },
-      paint: {
-        'text-color': 'rgba(255,255,255,0.7)',
-        'text-halo-color': 'rgba(0,0,0,0.5)',
-        'text-halo-width': 1
-      }
+      id: 'biv-line', type: 'line', source: 'boroughs-biv',
+      paint: { 'line-color': 'rgba(255,255,255,0.4)', 'line-width': 1 }
     });
 
     // hover tooltip
     mapBiv.on('mousemove', 'biv-fill', e => {
       if (!e.features.length) return;
-      const name = e.features[0].properties.name;
-      const stat = boroughStats.find(d => d.name === name);
-      if (stat) {
-        document.getElementById('biv-hover').innerHTML =
-          `<strong>${name}</strong> · Fire rate: ${stat.fireRate}/1k · 
-           Avg response: ${stat.responseTime}s`;
-      }
+      mapBiv.getCanvas().style.cursor = 'pointer';
+      const p = e.features[0].properties;
+      const imdLabel = ['', 'Least deprived', 'Below average', 'Above average', 'Most deprived'];
+      document.getElementById('biv-hover').innerHTML =
+        `<strong>${p.borough || 'Unknown'}</strong> · 
+         IMD: ${p.imd || 'N/A'} (${imdLabel[p.imd_q] || ''}) · 
+         Fire incidents: ${p.fire || 0}`;
     });
     mapBiv.on('mouseleave', 'biv-fill', () => {
+      mapBiv.getCanvas().style.cursor = '';
       document.getElementById('biv-hover').innerHTML =
-        '<span class="hover-hint">Hover a borough to see details</span>';
+        '<span class="hover-hint">Hover a grid cell to see IMD and fire data</span>';
     });
   });
 
-  // 替换原来的 IntersectionObserver 部分
-let bivResized = false;
-const bivObserver = new IntersectionObserver(entries => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      // 每次进入视口都触发resize，解决定格问题
-      setTimeout(() => mapBiv?.resize(), 100);
-      if (!bivResized) {
-        bivResized = true;
-        // 首次进入时强制重新渲染
-        setTimeout(() => {
-          mapBiv?.resize();
-          mapBiv?.setCenter([-0.1, 51.51]);
-        }, 300);
-      }
-    }
-  });
-}, { threshold: 0.1 });
-
-bivObserver.observe(document.getElementById('map-bivariate'));
-
-// 窗口resize时同步更新地图
-window.addEventListener('resize', () => {
-  setTimeout(() => mapBiv?.resize(), 100);
-});
+  new IntersectionObserver(e => {
+    e.forEach(x => { if (x.isIntersecting) mapBiv?.resize(); });
+  }, { threshold: 0.1 }).observe(document.getElementById('map-bivariate'));
 }
 
 
