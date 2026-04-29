@@ -543,19 +543,78 @@ function createChartMonthlyAll() {
   const d = DATA.monthlyByType;
   const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   killChart('monthlyAll');
+
   charts.monthlyAll = new Chart(document.getElementById('chart-monthly-all'), {
     type: 'line',
-    data: { labels: months, datasets: [
-      { label: 'Outdoor Fire', data: d.outdoor_fire, borderColor: C.fire, borderWidth: 2, pointRadius: 3, tension: 0.3 },
-      { label: 'Dwelling Fire', data: d.dwelling_fire, borderColor: '#f4a261', borderWidth: 2, pointRadius: 3, tension: 0.3, borderDash: [5, 3] },
-      { label: 'Flooding', data: d.flooding, borderColor: C.teal, borderWidth: 2, pointRadius: 3, tension: 0.3 },
-      { label: 'Forced Entry', data: d.forced_entry, borderColor: C.steel, borderWidth: 2, pointRadius: 3, tension: 0.3 },
-      { label: 'Agency Assist', data: d.agency_assist, borderColor: C.yellow, borderWidth: 2, pointRadius: 3, tension: 0.3 },
-      { label: 'False Alarm', data: d.false_alarm, borderColor: C.dim, borderWidth: 1.5, pointRadius: 2, tension: 0.3, borderDash: [3, 3] },
-    ]},
-    options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
-      plugins: { legend: { position: 'bottom', labels: { color: '#888', font: { size: 10 }, boxWidth: 14 } } },
-      scales: { x: { grid: { color: C.grid }, ticks: { color: C.tick } }, y: { grid: { color: C.grid }, ticks: { color: C.tick, callback: v => (v/1000)+'k' } } }
+    data: {
+      labels: months,
+      datasets: [
+        { label: 'Outdoor Fire',  data: d.outdoor_fire,  borderColor: C.fire,    borderWidth: 2.5, pointRadius: 3, tension: 0.3, fill: false },
+        { label: 'Dwelling Fire', data: d.dwelling_fire, borderColor: '#f4a261', borderWidth: 2,   pointRadius: 3, tension: 0.3, fill: false, borderDash: [5,3] },
+        { label: 'Flooding',      data: d.flooding,      borderColor: C.teal,    borderWidth: 2.5, pointRadius: 3, tension: 0.3, fill: false },
+        { label: 'Forced Entry',  data: d.forced_entry,  borderColor: C.steel,   borderWidth: 2.5, pointRadius: 3, tension: 0.3, fill: false },
+        { label: 'Agency Assist', data: d.agency_assist, borderColor: C.yellow,  borderWidth: 2,   pointRadius: 3, tension: 0.3, fill: false }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { color: '#ccc', font: { size: 11 }, boxWidth: 14 }
+        },
+        tooltip: {
+          backgroundColor: 'rgba(10,10,15,0.92)',
+          callbacks: {
+            label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString()}`
+          }
+        },
+        annotation: {
+          annotations: {
+            july: {
+              type: 'line',
+              xMin: 'Jul', xMax: 'Jul',
+              borderColor: 'rgba(255,107,53,0.5)',
+              borderWidth: 1.5,
+              borderDash: [4, 4],
+              label: {
+                content: 'July Peak',
+                display: true,
+                position: 'start',
+                backgroundColor: 'rgba(255,107,53,0.15)',
+                color: '#ff6b35',
+                font: { size: 10 }
+              }
+            },
+            december: {
+              type: 'line',
+              xMin: 'Dec', xMax: 'Dec',
+              borderColor: 'rgba(78,205,196,0.5)',
+              borderWidth: 1.5,
+              borderDash: [4, 4],
+              label: {
+                content: 'Dec Peak',
+                display: true,
+                position: 'start',
+                backgroundColor: 'rgba(78,205,196,0.15)',
+                color: '#4ecdc4',
+                font: { size: 10 }
+              }
+            }
+          }
+        }
+      },
+      scales: {
+        x: { grid: { color: C.grid }, ticks: { color: C.tick } },
+        y: {
+          grid: { color: C.grid },
+          ticks: { color: C.tick, callback: v => (v/1000)+'k' },
+          min: 0,
+          max: 15000
+        }
+      }
     }
   });
 }
@@ -566,42 +625,165 @@ function initScrollytelling() {
   const d = DATA.monthlyByType;
   const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-  const configs = {
-    outdoor: { data: d.outdoor_fire, color: C.fire, label: 'Outdoor Fire' },
-    dwelling: { data: d.dwelling_fire, color: '#f4a261', label: 'Dwelling Fire' },
-    flooding: { data: d.flooding, color: C.teal, label: 'Flooding' },
-    entry: { data: d.forced_entry, color: C.steel, label: 'Forced Entry' },
-    assist: { data: d.agency_assist, color: C.yellow, label: 'Agency Assist' },
-    collision: null,
+  const allSeries = [
+    { key: 'outdoor_fire',  label: 'Outdoor Fire',  color: C.fire,    data: d.outdoor_fire  },
+    { key: 'dwelling_fire', label: 'Dwelling Fire',  color: '#f4a261', data: d.dwelling_fire, dash: [5,3] },
+    { key: 'flooding',      label: 'Flooding',       color: C.teal,    data: d.flooding      },
+    { key: 'forced_entry',  label: 'Forced Entry',   color: C.steel,   data: d.forced_entry  },
+    { key: 'agency_assist', label: 'Agency Assist',  color: C.yellow,  data: d.agency_assist },
+  ];
+
+  const focusMap = {
+    outdoor:  'outdoor_fire',
+    dwelling: 'dwelling_fire',
+    flooding: 'flooding',
+    entry:    'forced_entry',
+    assist:   'agency_assist',
+  };
+
+  const panelColors = {
+    overview:  'rgba(255,255,255,0.03)',
+    outdoor:   'rgba(255,107,53,0.06)',
+    dwelling:  'rgba(244,162,97,0.06)',
+    flooding:  'rgba(78,205,196,0.06)',
+    entry:     'rgba(69,123,157,0.08)',
+    assist:    'rgba(255,230,109,0.05)',
+    collision: 'rgba(255,255,255,0.05)',
+  };
+
+  const borderColors = {
+    overview:  'rgba(255,255,255,0.08)',
+    outdoor:   'rgba(255,107,53,0.3)',
+    dwelling:  'rgba(244,162,97,0.3)',
+    flooding:  'rgba(78,205,196,0.3)',
+    entry:     'rgba(69,123,157,0.35)',
+    assist:    'rgba(255,230,109,0.25)',
+    collision: 'rgba(255,255,255,0.2)',
   };
 
   function updateFocusChart(step) {
     const canvas = document.getElementById('chart-monthly-focus');
     if (monthlyFocusChart) monthlyFocusChart.destroy();
 
-    let datasets;
-    if (step === 'collision') {
-      datasets = [
-        { label: 'Outdoor Fire', data: d.outdoor_fire, borderColor: C.fire, backgroundColor: C.fire + '20', fill: true, borderWidth: 2, pointRadius: 2, tension: 0.3 },
-        { label: 'Flooding', data: d.flooding, borderColor: C.teal, backgroundColor: C.teal + '20', fill: true, borderWidth: 2, pointRadius: 2, tension: 0.3 },
-        { label: 'Forced Entry', data: d.forced_entry, borderColor: C.steel, backgroundColor: C.steel + '20', fill: true, borderWidth: 2, pointRadius: 2, tension: 0.3 },
-        { label: 'Agency Assist', data: d.agency_assist, borderColor: C.yellow, backgroundColor: C.yellow + '20', fill: true, borderWidth: 2, pointRadius: 2, tension: 0.3 },
-      ];
-    } else {
-      const cfg = configs[step];
-      if (!cfg) return;
-      datasets = [{ label: cfg.label, data: cfg.data, borderColor: cfg.color, backgroundColor: cfg.color + '20', fill: true, borderWidth: 2.5, pointRadius: 3, tension: 0.3 }];
-    }
+    const focusKey = focusMap[step] || null;
+    const isOverview  = step === 'overview';
+    const isCollision = step === 'collision';
+
+    const datasets = allSeries.map(s => {
+      const isActive = isOverview || isCollision || s.key === focusKey;
+      return {
+        label: s.label,
+        data: s.data,
+        borderColor: isActive ? s.color : s.color + '22',
+        backgroundColor: (!isOverview && !isCollision && isActive) ? s.color + '20' : 'transparent',
+        fill: (!isOverview && !isCollision && isActive),
+        borderWidth: isActive ? 2.5 : 1,
+        pointRadius: isActive ? 3 : 0,
+        borderDash: s.dash || [],
+        tension: 0.3,
+      };
+    });
 
     monthlyFocusChart = new Chart(canvas, {
       type: 'line',
       data: { labels: months, datasets },
-      options: { responsive: true, maintainAspectRatio: false, animation: { duration: 600 },
-        plugins: { legend: { labels: { color: '#888' } } },
-        scales: { x: { grid: { color: C.grid }, ticks: { color: C.tick } }, y: { grid: { color: C.grid }, ticks: { color: C.tick, callback: v => v >= 1000 ? (v/1000)+'k' : v }, beginAtZero: true } }
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: { duration: 500 },
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: {
+            display: isOverview,
+            position: 'bottom',
+            labels: { color: '#ccc', font: { size: 11 }, boxWidth: 14 }
+          },
+          tooltip: {
+            backgroundColor: 'rgba(10,10,15,0.92)',
+            filter: item => {
+              if (isOverview || isCollision) return true;
+              return item.dataset.label === allSeries.find(s => s.key === focusKey)?.label;
+            },
+            callbacks: {
+              label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString()}`
+            }
+          },
+          annotation: isCollision ? {
+            annotations: {
+              july: {
+                type: 'line',
+                xMin: 'Jul', xMax: 'Jul',
+                borderColor: 'rgba(255,107,53,0.5)',
+                borderWidth: 1.5,
+                borderDash: [4, 4],
+                label: {
+                  content: 'July Peak',
+                  display: true,
+                  position: 'start',
+                  backgroundColor: 'rgba(255,107,53,0.15)',
+                  color: '#ff6b35',
+                  font: { size: 10 }
+                }
+              },
+              december: {
+                type: 'line',
+                xMin: 'Dec', xMax: 'Dec',
+                borderColor: 'rgba(78,205,196,0.5)',
+                borderWidth: 1.5,
+                borderDash: [4, 4],
+                label: {
+                  content: 'Dec Peak',
+                  display: true,
+                  position: 'start',
+                  backgroundColor: 'rgba(78,205,196,0.15)',
+                  color: '#4ecdc4',
+                  font: { size: 10 }
+                }
+              }
+            }
+          } : {}
+        },
+        scales: {
+          x: { grid: { color: C.grid }, ticks: { color: C.tick } },
+          y: {
+            grid: { color: C.grid },
+            ticks: { color: C.tick, callback: v => v >= 1000 ? (v/1000)+'k' : v },
+            min: 0,
+            max: 15000
+          }
+        }
       }
     });
   }
+
+  function updatePanel(step) {
+    const panel = document.getElementById('signal-panel');
+    if (!panel) return;
+
+    // 面板背景和边框随类型变色
+    panel.style.background   = panelColors[step] || panelColors.overview;
+    panel.style.borderColor  = borderColors[step] || borderColors.overview;
+
+    // signal-item 激活/变暗
+    panel.querySelectorAll('.signal-item').forEach(item => {
+      item.classList.remove('is-active', 'is-dimmed');
+      if (step === 'overview') {
+        // 全部正常，不展开
+      } else if (step === 'collision') {
+        item.classList.add('is-active');
+      } else {
+        if (item.dataset.step === step) {
+          item.classList.add('is-active');
+        } else {
+          item.classList.add('is-dimmed');
+        }
+      }
+    });
+  }
+
+  // 初始状态
+  updateFocusChart('overview');
+  updatePanel('overview');
 
   setTimeout(() => {
     const scroller = scrollama();
@@ -609,7 +791,9 @@ function initScrollytelling() {
       .onStepEnter(({ element }) => {
         document.querySelectorAll('#scrolly-ch3 .step').forEach(s => s.classList.remove('is-active'));
         element.classList.add('is-active');
-        updateFocusChart(element.dataset.step);
+        const step = element.dataset.step;
+        updateFocusChart(step);
+        updatePanel(step);
       });
     window.addEventListener('resize', scroller.resize);
   }, 500);

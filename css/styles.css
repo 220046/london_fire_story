@@ -145,9 +145,9 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text);
 
 /* SCROLLYTELLING (Ch3) */
 .scrolly { position:relative; display:flex; margin:2rem 0; }
-.scrolly-graphic { position:sticky; top:60px; width:55%; height:calc(100vh - 80px); flex-shrink:0; background:var(--glass); border:1px solid var(--glass-border); border-radius:12px; padding:1.5rem; }
+.scrolly-graphic { position:sticky; top:60px; width:60%; height:calc(100vh - 80px); flex-shrink:0; background:var(--glass); border:1px solid var(--glass-border); border-radius:12px; padding:1.5rem; }
 .scrolly-graphic canvas { width:100%; height:100%; }
-.scrolly-steps { width:45%; padding:0 2rem; }
+.scrolly-steps { width:40%; padding:0 2rem; }
 .step { padding:3rem 0; opacity:0.15; transition:opacity 0.6s ease; }
 .step:first-child { padding-top:20vh; }
 .step:last-child { padding-bottom:40vh; }
@@ -189,4 +189,225 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text);
   .scrolly { flex-direction:column; }
   .scrolly-graphic { position:relative; width:100%; height:50vh; top:0; }
   .scrolly-steps { width:100%; }
+}
+
+/* ── Signal Panel ── */
+.signal-panel {
+  position: sticky;
+  top: 10vh;
+  padding: 1.6rem 1.4rem;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.03);
+  transition: background 0.6s ease, border-color 0.6s ease;
+}
+
+.signal-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.4rem;
+}
+
+.signal-subtitle {
+  font-size: 0.78rem;
+  color: #666;
+  margin-bottom: 1.4rem;
+  line-height: 1.5;
+}
+
+.signal-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.signal-item {
+  display: grid;
+  grid-template-columns: 14px 2px 1fr;
+  grid-template-rows: auto 1fr;
+  column-gap: 12px;
+  padding: 10px 0;
+  transition: opacity 0.4s ease;
+}
+
+.signal-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  margin-top: 3px;
+  grid-column: 1;
+  grid-row: 1;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  flex-shrink: 0;
+}
+
+.signal-line {
+  width: 2px;
+  grid-column: 2;
+  grid-row: 1 / 3;
+  margin-left: 0;
+  border-radius: 1px;
+  min-height: 100%;
+  transition: background 0.4s ease;
+}
+
+.signal-content {
+  grid-column: 3;
+  grid-row: 1 / 3;
+}
+
+.signal-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+  transition: opacity 0.4s ease;
+}
+
+.signal-desc {
+  font-size: 0.76rem;
+  color: #888;
+  line-height: 1.6;
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 0.4s ease, opacity 0.4s ease;
+}
+
+/* 激活状态 */
+.signal-item.is-active .signal-dot {
+  transform: scale(1.3);
+}
+
+.signal-item.is-active .signal-desc {
+  max-height: 120px;
+  opacity: 1;
+}
+
+.signal-item.is-active .signal-name {
+  opacity: 1;
+}
+
+.signal-item.is-dimmed .signal-dot {
+  box-shadow: none;
+}
+
+.signal-item.is-dimmed .signal-name {
+  opacity: 0.3;
+}
+
+.signal-item.is-dimmed .signal-line {
+  background: rgba(255,255,255,0.05) !important;
+}
+/* ── Ch5 Findings ── */
+.findings-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.2rem;
+  margin-bottom: 1rem;
+}
+
+.finding-card {
+  border: 1px solid;
+  border-radius: 12px;
+  padding: 1.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.finding-icon {
+  font-size: 1.6rem;
+}
+
+.finding-label {
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.finding-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.finding-stat {
+  font-size: 0.78rem;
+  color: #ccc;
+}
+
+.finding-desc {
+  font-size: 0.78rem;
+  color: #aaa;
+  line-height: 1.6;
+  margin: 0;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  padding-top: 0.8rem;
+}
+
+/* ── Resilience Grid ── */
+.resilience-grid {
+  display: grid;
+  grid-template-columns: 1fr 2fr 0.6fr;
+  gap: 1px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+.res-cell {
+  background: rgba(15,15,20,0.9);
+  padding: 1rem 1.2rem;
+}
+
+.res-header-col {
+  background: rgba(255,255,255,0.03);
+}
+
+.res-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.res-dim {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.res-subdim {
+  font-size: 0.72rem;
+  color: #555;
+  line-height: 1.4;
+}
+
+.res-evidence {
+  font-size: 0.78rem;
+  color: #888;
+  line-height: 1.6;
+}
+
+.res-tag {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+  margin-top: 4px;
+}
+
+.res-amber {
+  background: rgba(255,200,80,0.12);
+  color: #ffc850;
+}
+
+.res-red {
+  background: rgba(255,80,80,0.1);
+  color: #ff6b6b;
 }
