@@ -41,9 +41,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   initSeasonalMap();
 });
 
-// ============================================================
 // Hero typewriter + ember particles
-// ============================================================
 function initHero() {
   const lines = ['The Fire Service', 'That Barely Fights Fires'];
   typewrite(document.getElementById('title-line1'), lines[0], 60, () => {
@@ -137,9 +135,7 @@ const C = { fire: '#ff6b35', teal: '#4ecdc4', yellow: '#ffe66d', dim: '#888', st
 // Destroy any prior Chart.js instance on this canvas before recreating it
 function killChart(id) { if (charts[id]) { charts[id].destroy(); delete charts[id]; } }
 
-// ============================================================
 // Ch1 stacked percentage area chart and side total trend line
-// ============================================================
 function createChartYearly() {
   const d = DATA.yearlyByType;
   killChart('yearly');
@@ -289,9 +285,7 @@ function createChartYearly() {
   }
 }
 
-// ============================================================
 // Ch2 tab one false alarm doughnut
-// ============================================================
 function createChartFA() {
   const d = DATA.falseAlarmBreakdown;
   killChart('fa');
@@ -395,9 +389,7 @@ function createChartFA() {
   });
 }
 
-// ============================================================
 // Ch2 tab two fire by property horizontal bar chart
-// ============================================================
 function createChartFireProp() {
   const d = DATA.fireByProperty;
   const labels = Object.keys(d).slice(0, 6), values = labels.map(l => d[l]);
@@ -409,9 +401,7 @@ function createChartFireProp() {
   });
 }
 
-// ============================================================
 // Ch2 tab three special service subtype D3 line chart
-// ============================================================
 let slopePaths = [];
 
 function createSlopeChart() {
@@ -473,9 +463,8 @@ function initTrajectoryTabs() {
   });
 }
 
-// ============================================================
+
 // Triple map global state
-// ============================================================
 let currentProp = { fire: 't', fa: 't', ss: 't' };
 let showAllYears = true;
 let currentYear = 2014;
@@ -495,9 +484,7 @@ function getColorExpr(prop, maxVal) {
     m * 0.45, '#ffe66d', m * 0.7, '#ff6b35', m, '#ff0000'];
 }
 
-// ============================================================
 // Triple density map init
-// ============================================================
 async function initTripleMaps() {
   const [boroughs, gridFire, gridFA, gridSS] = await Promise.all([
     fetch('data/london_boroughs.json').then(r => r.json()),
@@ -620,9 +607,7 @@ async function initTripleMaps() {
   });
 }
 
-// ============================================================
 // Response time map init
-// ============================================================
 async function initResponseMap() {
   const [boroughs, gridResp, stations] = await Promise.all([
     fetch('data/london_boroughs.json').then(r => r.json()),
@@ -908,9 +893,7 @@ async function initResponseMap() {
   }
 }
 
-// ============================================================
 // Borough response time ranking horizontal bar chart
-// ============================================================
 function createChartResponseRanking() {
   const sorted = Object.entries(DATA.boroughData)
     .map(([name, d]) => ({ name, resp: d.avgResponseSec }))
@@ -950,9 +933,7 @@ function createChartResponseRanking() {
   });
 }
 
-// ============================================================
 // Danger zone scatter plot annotated outside the top left at opacity 0.8
-// ============================================================
 function initScatterPlot() {
   const container = document.getElementById('scatter-plot').parentElement;
   const svg = d3.select('#scatter-plot');
@@ -1023,9 +1004,7 @@ function initScatterPlot() {
   });
 }
 
-// ============================================================
 // Indexing helper
-// ============================================================
 function indexify(arr) {
   const base = arr[0] || 1;
   return arr.map(v => Math.round(v / base * 100));
@@ -1117,9 +1096,7 @@ function initInOutTabs() {
   });
 }
 
-// ============================================================
 // IMD deprivation quartile versus fire rate bar chart
-// ============================================================
 function createChartQuartile() {
   const d = DATA.imdQuartile;
   killChart('quartile');
@@ -1132,9 +1109,7 @@ function createChartQuartile() {
   });
 }
 
-// ============================================================
 // Bivariate map of fire frequency against response time
-// ============================================================
 async function createBivariateMap() {
   const [gridFire, gridResp, boroughs] = await Promise.all([
     fetch('data/grid_fire.json').then(r => r.json()),
@@ -1213,9 +1188,7 @@ async function createBivariateMap() {
   }, { threshold: 0.1 }).observe(document.getElementById('map-bivariate'));
 }
 
-// ============================================================
 // AFA breakdown chart
-// ============================================================
 function createChartAFAAnalysis() {
   const d = DATA.yearlyByType;
   if (!d || !document.getElementById('chart-afa-trend')) return;
@@ -1289,16 +1262,12 @@ function createChartAFAAnalysis() {
   });
 }
 
-// ============================================================
 // Monthly seasonal overview merged into scrollytelling
-// ============================================================
 function createChartMonthlyAll() {
   // merged into scrollytelling chart
 }
 
-// ============================================================
 // Scrollytelling with updatePanel and signal sync
-// ============================================================
 let monthlyFocusChart = null;
 
 function initScrollytelling() {
@@ -1452,9 +1421,7 @@ function initScrollytelling() {
   }, 500);
 }
 
-// ============================================================
 // Effect one, mouse tracking glow
-// ============================================================
 function initCursorGlow() {
   const glow = document.createElement('div');
   glow.style.cssText = `
@@ -1507,9 +1474,7 @@ function initCursorGlow() {
   });
 }
 
-// ============================================================
 // Effect two, KPI card 3D tilt
-// ============================================================
 function initCardTilt() {
   document.querySelectorAll('.kpi-card').forEach(card => {
     card.style.transition = 'transform 0.1s ease, box-shadow 0.1s ease';
@@ -1532,9 +1497,7 @@ function initCardTilt() {
   });
 }
 
-// ============================================================
 // Bridge area, Three.js 3D particle sphere background
-// ============================================================
 function initBridgeParticles() {
 
   // Bridge one, ratio sphere one in seven
@@ -1807,9 +1770,7 @@ function initBridgeParticles() {
   })();
 }
 
-// ============================================================
 // Seasonal map
-// ============================================================
 function initSeasonalMap() {
   let currentSeason = 'summer';
   let currentType = 'outdoor_fire';
