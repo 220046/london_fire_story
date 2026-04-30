@@ -1,9 +1,3 @@
-/* ============================================================
-   MERGED STYLESHEET
-   Base: file-2  |  Additions: file-2-only blocks
-   Conflict resolution: file-2 wins
-   ============================================================ */
-
 /* Design tokens */
 :root {
   --bg: #0a0a0f;
@@ -27,10 +21,10 @@
 html { scroll-behavior: smooth; }
 body { font-family: var(--font-body); background: var(--bg); color: var(--text); overflow-x: hidden; line-height: 1.6; }
 
-/* ── PROGRESS BAR ── */
+/* PROGRESS BAR */
 #progress-bar { position:fixed; top:0; left:0; height:3px; width:0%; background:linear-gradient(90deg,var(--fire),var(--amber),var(--red),var(--teal),var(--steel)); background-size:200% 100%; z-index:9999; transition:width 0.1s linear; }
 
-/* ── NAV ── */
+/* NAV */
 #nav { position:fixed; top:0; left:0; width:100%; height:52px; background:rgba(10,10,15,0.85); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); border-bottom:1px solid var(--glass-border); z-index:1000; transition:transform 0.4s ease; }
 #nav.nav-hidden { transform:translateY(-100%); }
 .nav-inner { max-width:1400px; margin:0 auto; height:100%; display:flex; align-items:center; padding:0 2rem; }
@@ -40,7 +34,7 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text);
 .nav-link:hover, .nav-link.active { color:var(--fire); }
 .nav-home { margin-left:auto; font-size:0.8rem; color:var(--teal); cursor:pointer; font-family:var(--font-head); }
 
-/* ── HERO ── */
+/* HERO */
 .full-section { position:relative; width:100vw; height:100vh; display:flex; align-items:center; justify-content:center; overflow:hidden; }
 #ember-canvas { position:absolute; inset:0; width:100%; height:100%; z-index:1; }
 .hero-content { position:relative; z-index:2; text-align:center; padding:2rem; max-width:700px; }
@@ -53,8 +47,8 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text);
 @keyframes fadeUp { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
 @keyframes bounce { 0%,100%{transform:rotate(45deg) translateY(0)} 50%{transform:rotate(45deg) translateY(8px)} }
 
-/* ── BRIDGE ── */
-/* 采用 file-2 版本：canvas 居中固定尺寸 400×400，文字 z-index:3 覆盖其上 */
+/* BRIDGE */
+/* Bridge canvas centered at fixed 400 by 400, text overlays via z index 3 */
 .bridge {
   position: relative;
   overflow: hidden;
@@ -90,7 +84,7 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text);
 .bridge-text strong { color: var(--text); }
 .bridge-q { color: var(--fire); font-style: italic; }
 
-/* ── CHAPTER ── */
+/* CHAPTER */
 .chapter { padding:5rem 2rem 4rem; max-width:1400px; margin:0 auto; }
 .chapter-header { display:flex; align-items:baseline; gap:1rem; margin-bottom:1rem; justify-content:center; }
 .ch-num { font-family:var(--font-mono); font-size:3rem; font-weight:700; color:var(--fire); opacity:0.3; line-height:1; }
@@ -98,18 +92,18 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text);
 .ch-context { font-size:0.9rem; color:#bbb; line-height:1.7; margin-bottom:2.5rem; max-width:900px; margin-left:auto; margin-right:auto; }.ch-section { margin-bottom:3.5rem; }
 .ch-subtitle { font-family:var(--font-head); font-size:1.3rem; margin-bottom:1rem; text-align:center; }
 
-/* ── KPI ── */
+/* KPI */
 .kpi-row { display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; margin-bottom:2rem; }
 .kpi-card { background:var(--glass); border:1px solid var(--glass-border); border-radius:12px; padding:1.2rem; text-align:center; backdrop-filter:blur(8px); }
 .kpi-val { display:block; font-family:var(--font-mono); font-size:1.8rem; font-weight:700; color:var(--fire); margin-bottom:0.3rem; }
 .kpi-lbl { font-size:0.72rem; color:var(--dim); letter-spacing:1px; text-transform:uppercase; }
 
-/* ── CHART CONTAINERS ── */
+/* CHART CONTAINERS */
 .chart-box { background:var(--glass); border:1px solid var(--glass-border); border-radius:12px; padding:1.5rem; position:relative; }
 .chart-wide { height:380px; }
 .chart-scatter { height:auto; min-height:420px; }
 
-/* ── TABS ── */
+/* TABS */
 .traj-tabs { display:flex; gap:0.8rem; margin-bottom:1.5rem; flex-wrap:wrap; }
 .traj-tab { flex:1; min-width:180px; background:var(--glass); border:1px solid var(--glass-border); border-radius:12px; padding:0.8rem 1rem; cursor:pointer; transition:all 0.3s; display:flex; align-items:center; gap:0.6rem; }
 .traj-tab:hover, .traj-tab.active { border-color:var(--fire); }
@@ -132,7 +126,7 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text);
 .tp-chart { flex:1; background:var(--glass); border:1px solid var(--glass-border); border-radius:12px; padding:1rem; min-height:240px; position:relative; }
 .tp-chart canvas, .tp-chart svg { width:100%; height:100%; }
 
-/* 环形图专属尺寸控制 */
+/* Doughnut chart sizing */
 #chart-fa-wrap {
   height: 300px;
   max-width: 700px;
@@ -144,7 +138,7 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text);
   height: 100%;
 }
 
-/* ── TIME SLIDER ── */
+/* TIME SLIDER */
 .time-ctrl {
   display:flex; align-items:center; gap:1rem; margin-bottom:1rem;
   padding:0.7rem 1rem; background:var(--glass); border:1px solid var(--glass-border); border-radius:8px;
@@ -157,7 +151,7 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text);
 #time-slider::-webkit-slider-thumb { -webkit-appearance:none; width:14px; height:14px; background:var(--fire); border-radius:50%; cursor:pointer; }
 .time-label { font-family:var(--font-mono); font-size:0.8rem; color:var(--fire); min-width:80px; text-align:center; }
 
-/* ── SUB-CATEGORY PILLS ── */
+/* SUB CATEGORY PILLS */
 .sub-pills { display:flex; gap:0.3rem; margin-top:0.4rem; flex-wrap:wrap; justify-content:center; }
 .pill {
   padding:0.2rem 0.5rem; font-size:0.65rem; font-family:var(--font-head);
@@ -167,7 +161,7 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text);
 .pill:hover { border-color:var(--pill-c, var(--fire)); color:var(--pill-c, var(--fire)); }
 .pill.active { background:var(--pill-c, var(--fire)); color:#000; border-color:var(--pill-c, var(--fire)); }
 
-/* ── TRIPLE MAP ── */
+/* TRIPLE MAP */
 .triple-maps { display:flex; gap:0.8rem; height:400px; }
 .map-third { flex:1; display:flex; flex-direction:column; }
 .map-lbl {
@@ -188,7 +182,7 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text);
 .hover-info strong { color:var(--text); }
 .hover-info em { color:var(--fire); font-style:normal; }
 
-/* ── SPLIT ROW ── */
+/* SPLIT ROW */
 .inout-tabs { display:flex; gap:0.4rem; margin-bottom:1rem; }
 .split-row { display:flex; gap:2rem; align-items:center; }
 .split-text { flex:0 0 38%; }
@@ -199,8 +193,8 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text);
 .stat-note { font-family:var(--font-mono); font-size:0.8rem; color:var(--teal); margin-top:0.5rem; }
 .stat-cite { font-size:0.75rem; color:var(--muted); margin-top:0.3rem; }
 
-/* ── SCROLLYTELLING (Ch3) ── */
-/* file-2: scrolly-graphic 60% / scrolly-steps 40% */
+/* SCROLLYTELLING Ch3 */
+/* scrolly graphic 60 percent and scrolly steps 40 percent */
 .scrolly { position:relative; display:flex; margin:2rem 0; }
 .scrolly-graphic { position:sticky; top:60px; width:60%; height:calc(100vh - 80px); flex-shrink:0; background:var(--glass); border:1px solid var(--glass-border); border-radius:12px; padding:1.5rem; }
 .scrolly-graphic canvas { width:100%; height:100%; }
@@ -218,7 +212,7 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text);
 .sc-yellow { border-left:3px solid var(--yellow); }
 .sc-contrast { border-left:3px solid var(--steel); }
 
-/* ── CONCLUSION ── */
+/* CONCLUSION */
 .ch5-section { display:flex; align-items:center; justify-content:center; min-height:80vh; text-align:center; }
 .ch5-body { max-width:900px; margin:0 auto; }
 .conclusion-title { font-family:var(--font-head); font-size:2rem; margin-bottom:1.5rem; }
@@ -235,7 +229,7 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text);
 .methodology li { font-size:0.8rem; color:var(--dim); margin-bottom:0.3rem; line-height:1.5; }
 .credits { margin-top:2rem; color:var(--muted); font-size:0.8rem; }
 
-/* ── RESPONSIVE ── */
+/* RESPONSIVE */
 @media (max-width:900px) {
   .kpi-row { grid-template-columns:repeat(2,1fr); }
   .traj-panel.active { flex-direction:column; }
@@ -254,11 +248,9 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text);
   }
 }
 
-/* ══════════════════════════════════════════════
-   以下为 file-2 新增组件（file-1 中不存在）
-   ══════════════════════════════════════════════ */
+/* Additional components */
 
-/* ── Signal Panel ── */
+/* Signal Panel */
 .signal-panel {
   position: sticky;
   top: 10vh;
@@ -338,7 +330,7 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text);
 .signal-item.is-dimmed .signal-name { opacity: 0.3; }
 .signal-item.is-dimmed .signal-line { background: rgba(255,255,255,0.05) !important; }
 
-/* ── Ch5 Findings ── */
+/* Ch5 Findings */
 .findings-row {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -371,7 +363,7 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text);
   padding-top: 0.8rem;
 }
 
-/* ── Resilience Grid ── */
+/* Resilience Grid */
 .resilience-grid {
   display: grid;
   grid-template-columns: 1fr 2fr 0.6fr;
@@ -404,7 +396,7 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text);
 .res-amber { background: rgba(255,200,80,0.12); color: #ffc850; }
 .res-red { background: rgba(255,80,80,0.1); color: #ff6b6b; }
 
-/* ── Season Toggle ── */
+/* Season Toggle */
 .season-toggle {
   display: flex;
   gap: 8px;
@@ -438,7 +430,7 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--text);
   color: #457b9d;
 }
 
-/* ── Ward Popup (Mapbox) ── */
+/* Ward Popup Mapbox */
 .ward-popup .mapboxgl-popup-content {
   background: rgba(10,10,15,0.92);
   backdrop-filter: blur(8px);
