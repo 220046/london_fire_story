@@ -26,7 +26,9 @@
     </div>
   </nav>
 
-  <!-- HERO -->
+  <!-- ═══════════════════════════════════════════════
+       HERO — file-1版（纯canvas粒子，无背景图）
+  ═══════════════════════════════════════════════ -->
   <section id="hero" class="full-section">
     <canvas id="ember-canvas"></canvas>
     <div class="hero-content">
@@ -43,49 +45,140 @@
     </div>
   </section>
 
-  <div class="bridge"><p class="bridge-text">Fewer than <strong>1 in 7</strong> calls is a real fire.<br><span class="bridge-q">So what are the other 6?</span></p></div>
+  <!-- ═══════════════════════════════════════════════
+       BRIDGE 1 — file-2版（背景图 + 渐变遮罩 + canvas）
+  ═══════════════════════════════════════════════ -->
+  <div class="bridge" style="position:relative; overflow:hidden;">
+    <div style="position:absolute; inset:0; z-index:0;
+                background-image:url('../image/dominik-sostmann-NPlyVfeYp8I-unsplash.jpg');
+                background-size:cover; background-position:center;
+                filter:brightness(0.4);">
+    </div>
+    <div style="position:absolute; inset:0; z-index:1;
+                background:linear-gradient(180deg, rgba(10,10,15,0.6) 0%, rgba(10,10,15,0.3) 50%, rgba(10,10,15,0.7) 100%);">
+    </div>
+    <canvas class="bridge-canvas" id="bridge-canvas-1" style="position:relative; z-index:2;"></canvas>
+    <p class="bridge-text" style="max-width:700px; text-align:center;">
+      Fewer than <strong>1 in 7</strong> calls is a real fire.
+      <br><span class="bridge-q">So what are the other 6?</span>
+    </p>
+  </div>
 
+  <!-- ═══════════════════════════════════════════════
+       CH1 — file-1版（标题、假设框、完整分析文字）
+  ═══════════════════════════════════════════════ -->
   <section id="ch1" class="chapter">
-    <div class="chapter-header"><span class="ch-num">01</span><h2>What They Respond To</h2></div>
-    <p class="ch-context">London Fire Brigade answers over 100,000 calls a year. The composition of those calls has fundamentally shifted since 2014: fires are declining while new demands surge. This chapter maps what, where, and how much.</p>
+    <div class="chapter-header"><span class="ch-num">01</span><h2>More Than Fighting Fires</h2></div>
+    <p class="ch-context">Living in London, fire engines are a familiar sight — rushing past with sirens on, several times a day. This raises a natural question: are there really that many fires? And are they concentrated in the busy city centre? To find out, we made two assumptions going in:</p>
+
+    <div style="margin: 1rem 0 1.5rem 0; display:flex; flex-direction:column; gap:0.6rem; max-width:900px;">
+      <div style="display:flex; align-items:flex-start; gap:0.8rem; padding:0.7rem 1rem; background:rgba(255,107,53,0.06); border-left:3px solid var(--fire); border-radius:0 8px 8px 0;">
+        <span style="font-family:var(--font-mono); color:var(--fire); font-size:0.85rem; font-weight:700; flex-shrink:0;">01</span>
+        <span style="color:#c8c8c8; font-size:1rem;">Emergency calls are mainly about fighting fires.</span>
+      </div>
+      <div style="display:flex; align-items:flex-start; gap:0.8rem; padding:0.7rem 1rem; background:rgba(255,107,53,0.06); border-left:3px solid var(--fire); border-radius:0 8px 8px 0;">
+        <span style="font-family:var(--font-mono); color:var(--fire); font-size:0.85rem; font-weight:700; flex-shrink:0;">02</span>
+        <span style="color:#c8c8c8; font-size:1rem;">Inner London has greater demand than outer London.</span>
+      </div>
+    </div>
 
     <div class="ch-section">
-      <h3 class="ch-subtitle">The Structural Shift</h3>
+      <h3 class="ch-subtitle">
+        <span style="color:var(--fire); font-family:var(--font-mono);
+               font-size:1.4rem; font-weight:700; margin-right:0.8rem;">1.1</span>
+        The Structural Shift
+      </h3>
+      <p class="ch-context">Both assumptions turned out to be wrong. Since 2014, London Fire Brigade has answered over 1.3 million calls — but only 14% in 2025 were actual fires. The share of real fires has fallen steadily, while Special Service calls have surged from 30% to 41% of all incidents. The brigade is being reshaped by demands that have nothing to do with flames.</p>
+
       <div class="kpi-row" id="kpi-ch1">
         <div class="kpi-card"><span class="kpi-val" data-to="1340000" data-suf="">0</span><span class="kpi-lbl">Calls (2014 to 2025)</span></div>
         <div class="kpi-card"><span class="kpi-val" data-to="14" data-suf="%">0</span><span class="kpi-lbl">Are Fires (2025)</span></div>
         <div class="kpi-card"><span class="kpi-val" data-to="41" data-suf="%">0</span><span class="kpi-lbl">Special Service</span></div>
         <div class="kpi-card"><span class="kpi-val" data-to="45" data-suf="%">0</span><span class="kpi-lbl">False Alarm</span></div>
       </div>
-      <div class="chart-box chart-wide"><canvas id="chart-yearly"></canvas></div>
+
+      <div style="display:flex; gap:16px; height:280px;">
+        <div style="flex:7; position:relative; display:flex; flex-direction:column;">
+          <div style="color:#aaa; font-size:11px; margin-bottom:6px; letter-spacing:0.05em;">SHARE OF INCIDENT TYPES (%)</div>
+          <div style="flex:1; position:relative;"><canvas id="chart-yearly"></canvas></div>
+        </div>
+        <div style="flex:3; position:relative; display:flex; flex-direction:column;">
+          <div style="color:#aaa; font-size:11px; margin-bottom:6px; letter-spacing:0.05em;">TOTAL CALLS PER YEAR</div>
+          <div style="flex:1; position:relative;"><canvas id="chart-yearly-total"></canvas></div>
+        </div>
+      </div>
     </div>
 
+    <p class="ch-context">The composition of emergency calls is itself a signal — one that tells us how a city's pressures are changing over time.</p>
+
     <div class="ch-section">
-      <h3 class="ch-subtitle">Three Trajectories</h3>
+      <h3 class="ch-subtitle">
+        <span style="color:var(--fire); font-family:var(--font-mono);
+               font-size:1.4rem; font-weight:700; margin-right:0.8rem;">1.2</span>
+        Three Trajectories
+      </h3>
+      <p class="ch-context">London Fire Brigade answers over 100,000 calls a year — but what those calls actually are has changed fundamentally. Three trajectories have emerged since 2014, each telling a different story about what the city is asking of its emergency services.</p>
+      <p class="ch-context">False alarms account for nearly half of all call-outs, with 77% triggered by Automatic Fire Alarms in commercial buildings and institutions — a systemic infrastructure failure that has generated over 600,000 wasted responses since 2014. Real fires, meanwhile, have fallen by nearly half, reflecting the success of building regulations and smoke alarm adoption; yet dwelling fires remain the dominant category, stubbornly concentrated in residential areas. The sharpest growth has come from a third direction entirely: Special Service calls have surged from 30% to 41% of all incidents. Forced entries are up 127%. Agency assists — supporting the police, NHS, and other overstretched services — have increased nearly tenfold. These are not fire emergencies. They are distress signals from an ageing population and a public sector under pressure.</p>
+
       <div class="traj-tabs">
         <button class="traj-tab active" data-t="fa"><span class="tt-dot dot-gray"></span><span class="tt-name">False Alarm</span></button>
         <button class="traj-tab" data-t="fire"><span class="tt-dot dot-fire"></span><span class="tt-name">Fire</span></button>
         <button class="traj-tab" data-t="ss"><span class="tt-dot dot-teal"></span><span class="tt-name">Special Service</span></button>
       </div>
+
       <div class="traj-panels">
+        <!-- FA Panel -->
         <div class="traj-panel active" id="tp-fa">
-          <div class="tp-text"><h4>The Wasted Effort</h4><p>75% of false alarms are automatic fire alarms malfunctioning. Nearly <strong>1 in 2</strong> calls is a wasted trip.</p></div>
-          <div class="tp-chart"><canvas id="chart-fa"></canvas></div>
+          <div class="tp-text" style="display:flex; flex-direction:column; justify-content:center; gap:20px; min-width:180px;">
+            <div>
+              <div id="fa-stat-afa" style="font-size:44px; font-weight:700; color:#ff6b35; line-height:1; font-family:'JetBrains Mono',monospace;">75%</div>
+              <div style="color:#aaa; font-size:12px; margin-top:5px; line-height:1.5;">automatic alarm<br>malfunctions (AFA)</div>
+            </div>
+            <div>
+              <div id="fa-stat-good" style="font-size:30px; font-weight:600; color:#4ecdc4; line-height:1;">21%</div>
+              <div style="color:#aaa; font-size:12px; margin-top:5px;">good intent calls</div>
+            </div>
+            <div>
+              <div id="fa-stat-mal" style="font-size:26px; font-weight:600; color:#ffe66d; line-height:1;">2%</div>
+              <div style="color:#aaa; font-size:12px; margin-top:5px;">malicious false alarms</div>
+            </div>
+            <p style="font-size:13px; color:#888; margin-top:8px; border-top:1px solid #2a2a2a; padding-top:12px;">
+              Nearly <strong style="color:#ccc;">1 in 2</strong> calls is a wasted trip.
+            </p>
+          </div>
+          <div class="tp-chart" id="chart-fa-wrap"
+               style="display:flex; align-items:center; justify-content:center; padding:8px 16px; box-sizing:border-box;">
+            <canvas id="chart-fa"></canvas>
+          </div>
         </div>
+
+        <!-- Fire Panel -->
         <div class="traj-panel" id="tp-fire">
           <div class="tp-text"><h4>The Decline</h4><p>Fire incidents have dropped significantly since 2014. Building regulations and smoke alarms are working. Dwelling fires dominate.</p></div>
           <div class="tp-chart"><canvas id="chart-fire-prop"></canvas></div>
         </div>
+
+        <!-- SS Panel — file-1版（简洁文字） -->
         <div class="traj-panel" id="tp-ss">
-          <div class="tp-text"><h4>The Rise</h4><p>Special service now accounts for 41% of all calls. Since 2014, forced entries have grown <strong>+127%</strong> and agency assists are nearly <strong>10× higher</strong> (560 in 2014, 5,427 in 2025). The brigade increasingly handles incidents that are not fires at all.</p></div>
+          <div class="tp-text">
+            <h4>The Rise</h4>
+            <p>Special service now accounts for 41% of all calls. Since 2014, forced entries have grown <strong>+127%</strong> and agency assists are nearly <strong>10× higher</strong> (560 in 2014, 5,427 in 2025). The brigade increasingly handles incidents that are not fires at all.</p>
+          </div>
           <div class="tp-chart"><svg id="slope-chart"></svg></div>
         </div>
       </div>
     </div>
 
+    <p class="ch-context">Together, these three trajectories expose a structural mismatch at the core of London's emergency system. The brigade is being asked to absorb demand it was never designed for, while simultaneously losing nearly half its operational capacity to wasted trips. Fire incidents declining is a resilience success — but it does not mean the system is under less pressure. It means the nature of that pressure has changed, and the infrastructure has not kept pace.</p>
+
     <div class="ch-section">
-      <h3 class="ch-subtitle">Spatial Distribution</h3>
-      <p class="ch-context">Three incident types, three completely different spatial patterns. 250m grid aggregation reveals sub-borough detail invisible at coarser scales.</p>
+      <h3 class="ch-subtitle">
+        <span style="color:var(--fire); font-family:var(--font-mono);
+               font-size:1.4rem; font-weight:700; margin-right:0.8rem;">1.3</span>
+        Spatial Distribution
+      </h3>
+      <p class="ch-context">Knowing what the brigade responds to is only half the picture. The other half is where. Emergency calls do not distribute evenly across London — their spatial patterns reveal the underlying geography of urban risk, infrastructure, and social need.</p>
+      <p class="ch-context">Mapping 1.3 million incidents at 250m grid resolution reveals three completely distinct spatial signatures. Fire density concentrates in inner London's residential corridors, with sharp hotspots along the Thames and in east London boroughs. False alarm density clusters around commercial and institutional zones — the CBD, hospital campuses, and office districts — reflecting the geography of AFA-equipped buildings. Special service density spreads the widest, extending into outer boroughs and growing there fastest.</p>
 
       <div class="time-ctrl">
         <button id="time-play" class="time-btn">Play</button>
@@ -94,6 +187,7 @@
         <button id="time-all" class="time-btn time-btn-sec">All Years</button>
       </div>
 
+      <!-- Triple Maps — file-1 pill结构 -->
       <div class="triple-maps">
         <div class="map-third">
           <div class="map-lbl"><span class="lbl-dot dot-fire"></span> Fire Density</div>
@@ -129,52 +223,208 @@
           </div>
         </div>
       </div>
+
+      <div style="display:flex; justify-content:center; align-items:center; gap:6px; margin-top:0.8rem; margin-bottom:0.4rem;">
+        <span style="font-size:0.75rem; color:var(--dim); margin-right:8px;">Incident density:</span>
+        <div style="display:flex; align-items:center; gap:3px;">
+          <div style="width:80px; height:10px; border-radius:4px;
+                      background:linear-gradient(90deg, #1a1a2e 0%, #2d4a3e 20%, #4ecdc4 45%, #ffe66d 65%, #ff6b35 82%, #ff0000 100%);"></div>
+        </div>
+        <span style="font-size:0.72rem; color:var(--dim); margin-left:4px;">Low</span>
+        <span style="font-size:0.72rem; color:var(--dim);">→</span>
+        <span style="font-size:0.72rem; color:var(--text);">High</span>
+        <span style="font-size:0.72rem; color:var(--muted); margin-left:16px;">Grid: 250m × 250m · Source: LFB 2014–2025</span>
+      </div>
       <div id="triple-hover" class="hover-info"><span class="hover-hint">Hover over a grid cell. Use the slider for time periods and the pills for sub-categories.</span></div>
     </div>
+
+    <p class="ch-context">Ward boundaries are administrative units that can mask significant internal variation — a single ward may contain both dense commercial streets and quiet residential estates. A uniform 250m grid avoids this aggregation bias, revealing sub-ward spatial heterogeneity that would otherwise be invisible.</p>
+    <p class="ch-context">The three maps make the mismatch visible: the system's historical infrastructure was built around the fire density pattern — concentrated in the centre. But special service demand is spreading outward, into areas the network was not designed to serve at scale.</p>
   </section>
 
-  <div class="bridge"><p class="bridge-text">Different places, different risks, different waits.<br><span class="bridge-q">Is the system keeping up?</span></p></div>
+  <!-- ═══════════════════════════════════════════════
+       BRIDGE 2 — file-2版（背景图 + 渐变遮罩 + canvas）
+  ═══════════════════════════════════════════════ -->
+  <div class="bridge" style="position:relative; overflow:hidden;">
+    <div style="position:absolute; inset:0; z-index:0;
+                background-image:url('https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=1920&q=80');
+                background-size:cover; background-position:center 60%;
+                filter:brightness(0.4);">
+    </div>
+    <div style="position:absolute; inset:0; z-index:1;
+                background:linear-gradient(180deg, rgba(10,10,15,0.6) 0%, rgba(10,10,15,0.3) 50%, rgba(10,10,15,0.7) 100%);">
+    </div>
+    <canvas class="bridge-canvas" id="bridge-canvas-2" style="position:relative; z-index:2;"></canvas>
+    <p class="bridge-text" style="max-width:700px; text-align:center;">
+      Different places, different risks, different waits.
+      <br><span class="bridge-q">Is the system keeping up?</span>
+    </p>
+  </div>
 
+  <!-- ═══════════════════════════════════════════════
+       CH2 — file-1版（完整拖拽面板、响应时间地图、双变量地图）
+  ═══════════════════════════════════════════════ -->
   <section id="ch2" class="chapter">
-    <div class="chapter-header"><span class="ch-num">02</span><h2>Who Waits the Longest</h2></div>
+    <div class="chapter-header"><span class="ch-num">02</span><h2>The Response Gap</h2></div>
     <p class="ch-context">Risk is shaped by both hazard and vulnerability. The 250m grid reveals where incidents concentrate; response time reveals how quickly help arrives.</p>
 
     <div class="ch-section">
-      <h3 class="ch-subtitle">Response Time Across London</h3>
+      <h3 class="ch-subtitle">
+        <span style="color:var(--fire); font-family:var(--font-mono);
+               font-size:1.4rem; font-weight:700; margin-right:0.8rem;">2.1</span>
+        Response Time Across London
+      </h3>
+      <p class="ch-context">Response time is the most direct measure of a fire service's effectiveness. But London is not uniformly served — the time it takes for the first pump to arrive varies dramatically across the city, and those variations follow a clear spatial logic.</p>
+      <p class="ch-context">The ten slowest boroughs are all in outer London, with Hillingdon averaging over 379 seconds — more than six minutes. The ten fastest are concentrated in inner London, where station density is highest. The map makes the gradient visible: response times increase outward from the centre in a pattern that mirrors station coverage rather than population need. Every outer borough in the top-ten slowest list has also seen Special Service demand grow by over 80% since 2014.</p>
+
       <div class="single-map-wrap">
-        <div class="map-lbl"><span class="lbl-dot dot-teal"></span> First Pump Attendance Time (250m grid, all incident types)</div>
-        <div id="map-response" class="map-box map-large"></div>
-        <div class="map-ctrl-row">
-          <div id="resp-hover" class="hover-info" style="flex:1"><span class="hover-hint">Hover grid for response time</span></div>
-          <button id="station-toggle" class="pill" style="--pill-c:#ffffff; white-space:nowrap;">Show Fire Stations</button>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.8rem; flex-wrap:wrap; gap:8px;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span style="font-size:0.75rem; color:var(--dim);">Faster response</span>
+            <div style="width:120px; height:10px; border-radius:4px;
+                        background:linear-gradient(90deg, #1a1a2e 0%, #2d4a3e 20%, #4ecdc4 45%, #ffe66d 65%, #ff6b35 82%, #ff0000 100%);"></div>
+            <span style="font-size:0.75rem; color:var(--text);">Slower response</span>
+          </div>
+          <span style="font-size:0.72rem; color:var(--muted);">250m × 250m grid · Avg first pump attendance time · LFB 2014–2025</span>
+        </div>
+
+        <!-- 地图 + 左侧可拖拽面板 -->
+        <div style="display:flex; gap:0; border-radius:12px; overflow:hidden; border:1px solid var(--glass-border); height:520px; position:relative;">
+
+          <!-- 左侧操作面板 -->
+          <div id="resp-panel" style="width:300px; flex-shrink:0; background:rgba(10,10,15,0.92);
+               border-right:1px solid var(--glass-border); display:flex; flex-direction:column;
+               overflow:hidden; position:relative; min-width:200px; max-width:80%;">
+
+            <div style="display:flex; flex-direction:column; gap:4px; padding:12px 10px 8px;">
+              <button class="resp-tab-btn active" data-tab="top10"
+                style="text-align:left; padding:8px 10px; border-radius:8px; border:1px solid var(--glass-border);
+                       background:rgba(255,107,53,0.15); color:var(--fire); font-size:0.75rem;
+                       font-family:var(--font-head); cursor:pointer; transition:all 0.2s;">
+                🔴 Slowest 10 Boroughs
+              </button>
+              <button class="resp-tab-btn" data-tab="bot10"
+                style="text-align:left; padding:8px 10px; border-radius:8px; border:1px solid var(--glass-border);
+                       background:var(--glass); color:var(--dim); font-size:0.75rem;
+                       font-family:var(--font-head); cursor:pointer; transition:all 0.2s;">
+                🟢 Fastest 10 Boroughs
+              </button>
+              <button class="resp-tab-btn" data-tab="search"
+                style="text-align:left; padding:8px 10px; border-radius:8px; border:1px solid var(--glass-border);
+                       background:var(--glass); color:var(--dim); font-size:0.75rem;
+                       font-family:var(--font-head); cursor:pointer; transition:all 0.2s;">
+                🔍 Search Borough
+              </button>
+              <button id="station-toggle" class="resp-tab-btn" data-tab="stations"
+                style="text-align:left; padding:8px 10px; border-radius:8px; border:1px solid var(--glass-border);
+                       background:var(--glass); color:var(--dim); font-size:0.75rem;
+                       font-family:var(--font-head); cursor:pointer; transition:all 0.2s;">
+                📍 Show Fire Stations
+              </button>
+            </div>
+
+            <div style="border-top:1px solid var(--glass-border); margin:0 10px;"></div>
+
+            <div id="resp-search-box" style="display:none; padding:8px 10px;">
+              <input id="resp-search-input" type="text" placeholder="Type borough name..."
+                style="width:100%; padding:6px 8px; background:rgba(255,255,255,0.05);
+                       border:1px solid var(--glass-border); border-radius:6px;
+                       color:var(--text); font-size:0.75rem; outline:none;"/>
+            </div>
+
+            <div id="resp-panel-content" style="flex:1; overflow-y:auto; padding:8px 10px;"></div>
+
+            <div style="padding:8px 10px; border-top:1px solid var(--glass-border); font-size:0.68rem; color:var(--muted); flex-shrink:0;">
+              <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#4ecdc4; margin-right:4px;"></span>Outer London &nbsp;
+              <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#ff6b35; margin-right:4px;"></span>Inner London
+            </div>
+
+            <div id="resp-resize-handle"
+              style="position:absolute; right:0; top:0; width:6px; height:100%;
+                     cursor:col-resize; background:transparent; z-index:10;
+                     border-right:2px solid rgba(255,255,255,0.1);">
+            </div>
+          </div>
+
+          <!-- 右侧地图 -->
+          <div style="flex:1; position:relative; min-width:0;">
+            <div class="map-lbl" style="position:absolute; top:8px; left:50%; transform:translateX(-50%);
+                 z-index:10; background:rgba(10,10,15,0.7); padding:3px 10px; border-radius:20px;
+                 font-size:0.8rem; white-space:nowrap;">
+              <span class="lbl-dot dot-teal"></span> First Pump Attendance Time (250m grid)
+            </div>
+            <div id="map-response" style="width:100%; height:100%;"></div>
+          </div>
+        </div>
+
+        <div id="resp-hover" class="hover-info" style="margin-top:0.6rem;">
+          <span class="hover-hint">Hover grid for response time. White dots are fire stations.</span>
         </div>
       </div>
+
+      <p class="ch-context">Response time is not just an operational metric — it is a measure of where the system's capacity is concentrated and where it falls short. The geography of slow response maps almost exactly onto the geography of growing demand. This is the spatial mismatch at the core of London's resilience gap.</p>
     </div>
 
     <div class="ch-section">
-      <h3 class="ch-subtitle">The Danger Zone</h3>
-      <p class="ch-context">Boroughs where special service demand is growing fastest are often those where the fire service takes longest to arrive.</p>
-      <div class="chart-box chart-scatter"><svg id="scatter-plot"></svg></div>
+      <h3 class="ch-subtitle">
+        <span style="color:var(--fire); font-family:var(--font-mono);
+               font-size:1.4rem; font-weight:700; margin-right:0.8rem;">2.2</span>
+        The Danger Zone
+      </h3>
+      <p class="ch-context">Is the mismatch between growing demand and slow response a coincidence, or a structural pattern? Plotting every borough simultaneously reveals the answer.</p>
+      <p class="ch-context">Boroughs in the upper-right quadrant — the Danger Zone — face both the fastest-growing Special Service demand and the longest response times. Without exception, these are outer London boroughs: Hillingdon, Havering, Bromley, Harrow, Sutton. Inner London boroughs cluster in the lower-left: lower growth, faster response. The pattern is systematic, not random.</p>
+      <div class="chart-box chart-scatter" style="height:auto; min-height:420px; overflow:visible;"><svg id="scatter-plot"></svg></div>
+      <p class="ch-context">This is a correlation, not a proven causal chain — longer response times in outer boroughs reflect historical station placement and geographic coverage, not a direct consequence of demand growth. But the coincidence of both pressures in the same places creates a compounding risk.</p>
+      <p class="ch-context">The Danger Zone visualises the core resilience challenge: the places experiencing the greatest increase in demand are the same places least equipped to absorb it quickly.</p>
     </div>
 
     <div class="ch-section">
-      <h3 class="ch-subtitle">The Outward Shift</h3>
-      <p class="ch-context">Across all three incident types, outer London is growing faster than inner London. The indexed chart below (2014 = 100) makes the divergence clear.</p>
+      <h3 class="ch-subtitle">
+        <span style="color:var(--fire); font-family:var(--font-mono);
+               font-size:1.4rem; font-weight:700; margin-right:0.8rem;">2.3</span>
+        The Outward Shift
+      </h3>
+      <p class="ch-context">If the spatial mismatch is real, when did it emerge? The indexed trend chart traces the divergence over time, revealing both its scale and its acceleration.</p>
+      <p class="ch-context">Across all three incident types, outer London has grown faster than inner London since 2014. The divergence accelerated sharply after 2020 — COVID-19 disrupted demand patterns and the recovery did not restore the pre-pandemic distribution. Special Service calls in outer London have more than doubled since 2014, while inner London growth sits at 89%. False alarms grew 35% in outer boroughs versus 26% in inner ones. Even fire incidents, which declined overall, fell faster in inner London than outer.</p>
+
       <div class="inout-tabs">
         <button class="pill active" data-io="all">All Types</button>
         <button class="pill" data-io="Fire" style="--pill-c:#ff6b35">Fire</button>
         <button class="pill" data-io="False Alarm" style="--pill-c:#888">False Alarm</button>
         <button class="pill" data-io="Special Service" style="--pill-c:#4ecdc4">Special Service</button>
       </div>
-      <div class="chart-box chart-wide"><canvas id="chart-inout"></canvas></div>
-      <div class="split-text" style="margin-top:1rem; text-align:center;">
-        <p>Fire: Inner <strong>−6.9%</strong> vs Outer <strong>+6.7%</strong>. False Alarm: Inner +26% vs Outer <strong>+35%</strong>. Special Service: Inner +89% vs Outer <strong>+104%</strong>.</p>
-        <p>Outer boroughs are absorbing the bulk of the new demand, yet station coverage there has barely changed since 2014.</p>
+      <div style="display:flex; gap:1.5rem; align-items:flex-start;">
+        <div class="chart-box chart-wide" style="flex:0 0 78%; padding-right:0;">
+          <canvas id="chart-inout"></canvas>
+        </div>
+        <div style="flex:0 0 18%; min-width:120px; display:flex; flex-direction:column; gap:0.5rem; padding-top:0.5rem;">
+          <div style="font-size:0.65rem; color:var(--dim); letter-spacing:0.5px; text-transform:uppercase; margin-bottom:0.2rem;">Growth since 2014</div>
+          <div class="stat-badge" style="background:rgba(255,107,53,0.08); border:1px solid rgba(255,107,53,0.2); border-radius:8px; padding:0.5rem 0.7rem;">
+            <div style="font-size:0.65rem; color:var(--fire); font-weight:600; margin-bottom:3px;">Fire</div>
+            <div style="font-size:0.72rem; color:#ccc; line-height:1.5;">Inner <strong style="color:#e8e8e8;">−6.9%</strong><br>Outer <strong style="color:var(--fire);">+6.7%</strong></div>
+          </div>
+          <div class="stat-badge" style="background:rgba(136,136,136,0.08); border:1px solid rgba(136,136,136,0.2); border-radius:8px; padding:0.5rem 0.7rem;">
+            <div style="font-size:0.65rem; color:#aaa; font-weight:600; margin-bottom:3px;">False Alarm</div>
+            <div style="font-size:0.72rem; color:#ccc; line-height:1.5;">Inner <strong style="color:#e8e8e8;">+26%</strong><br>Outer <strong style="color:#bbb;">+35%</strong></div>
+          </div>
+          <div class="stat-badge" style="background:rgba(78,205,196,0.08); border:1px solid rgba(78,205,196,0.2); border-radius:8px; padding:0.5rem 0.7rem;">
+            <div style="font-size:0.65rem; color:var(--teal); font-weight:600; margin-bottom:3px;">Special Service</div>
+            <div style="font-size:0.72rem; color:#ccc; line-height:1.5;">Inner <strong style="color:#e8e8e8;">+89%</strong><br>Outer <strong style="color:var(--teal);">+104%</strong></div>
+          </div>
+          <div style="font-size:0.65rem; color:var(--muted); margin-top:0.3rem; line-height:1.6; padding:0.5rem 0.7rem; background:var(--glass); border-radius:8px;">
+            Outer boroughs absorb the bulk of new demand, yet station coverage there has barely changed since 2014.
+          </div>
+        </div>
       </div>
+      <p class="ch-context">The outward shift is not a temporary fluctuation — it is a structural redistribution of where London's emergency demand is generated. The station network, designed for a city where demand concentrated at the centre, has not reoriented to match. This is the absorptive capacity problem: the system's geography is becoming misaligned with the city's actual needs.</p>
     </div>
 
     <div class="ch-section">
-      <h3 class="ch-subtitle">Deprivation and Fire Risk</h3>
+      <h3 class="ch-subtitle">
+        <span style="color:var(--fire); font-family:var(--font-mono);
+               font-size:1.4rem; font-weight:700; margin-right:0.8rem;">2.4</span>
+        Deprivation and Fire Risk
+      </h3>
       <div class="split-row">
         <div class="chart-box split-chart"><canvas id="chart-quartile"></canvas></div>
         <div class="split-text">
@@ -185,47 +435,528 @@
         </div>
       </div>
     </div>
-  </section>
-
-  <div class="bridge"><p class="bridge-text">Different emergencies follow<br><strong>completely different seasonal clocks</strong>.</p></div>
-
-  <section id="ch3" class="chapter">
-    <div class="chapter-header"><span class="ch-num">03</span><h2>When Emergencies Strike</h2></div>
-    <p class="ch-context">Fire services typically plan for a flat demand curve, but the monthly data reveals overlapping seasonal peaks across incident types. Scroll through each one to see when its calls cluster.</p>
 
     <div class="ch-section">
-      <h3 class="ch-subtitle">The Seasonal Landscape</h3>
-      <div class="chart-box chart-wide"><canvas id="chart-monthly-all"></canvas></div>
+      <h3 class="ch-subtitle">
+        <span style="color:var(--fire); font-family:var(--font-mono);
+               font-size:1.4rem; font-weight:700; margin-right:0.8rem;">2.5</span>
+        Fire Incident Rate × Response Time: Grid-Level Pattern
+      </h3>
+      <p class="ch-context">Response time and fire risk are both unevenly distributed across London. But do they compound each other — are the places with the most fires also the places where help arrives slowest? A bivariate map at 250m grid resolution allows both dimensions to be read simultaneously.</p>
+      <p class="ch-context">The map reveals a clear spatial split. Inner London, particularly the east and south-east, concentrates orange cells — high fire incident rate combined with slow response. These are areas where the double burden is most acute. The teal cells — high fire rate but fast response — cluster around central London where station density is highest. Much of outer London sits in lighter shades: lower fire rates, but response times that are already slow and growing.</p>
+
+      <div style="display:flex; gap:2rem; align-items:flex-start; margin-top:1.5rem;">
+        <div style="flex:0 0 70%; min-width:0;">
+          <div id="map-bivariate"
+               style="height:420px; width:100%; border-radius:12px; overflow:hidden; border:1px solid var(--glass-border);">
+          </div>
+          <div id="biv-hover" class="hover-info" style="margin-top:0.6rem;">
+            <span class="hover-hint">Hover a grid cell to see fire rate and response time</span>
+          </div>
+        </div>
+
+        <div style="flex:0 0 28%; padding-left:12px; min-width:160px; display:flex; flex-direction:column; gap:12px;">
+          <div>
+            <div style="font-size:0.78rem; color:#ccc; font-weight:600; margin-bottom:10px;">How to read:</div>
+            <div style="display:flex; gap:6px; align-items:flex-start;">
+              <div style="display:flex; flex-direction:column; align-items:center; gap:2px; padding-top:2px;">
+                <span style="font-size:0.62rem; color:var(--teal);">↑ Fast</span>
+                <div style="writing-mode:vertical-rl; transform:rotate(180deg); font-size:0.62rem; color:var(--dim); letter-spacing:0.5px; flex:1; text-align:center; padding:4px 0;">Response Time</div>
+                <span style="font-size:0.62rem; color:var(--fire);">↓ Slow</span>
+              </div>
+              <div>
+                <div style="display:grid; grid-template-columns:repeat(3,30px); grid-template-rows:repeat(3,22px); gap:2px;">
+                  <div style="background:#d4f5f3; border-radius:2px;"></div>
+                  <div style="background:#7eddd8; border-radius:2px;"></div>
+                  <div style="background:#4ecdc4; border-radius:2px;"></div>
+                  <div style="background:#f5e8d4; border-radius:2px;"></div>
+                  <div style="background:#f0c090; border-radius:2px;"></div>
+                  <div style="background:#ff9a5c; border-radius:2px;"></div>
+                  <div style="background:#fdf0e8; border-radius:2px;"></div>
+                  <div style="background:#ffb37a; border-radius:2px;"></div>
+                  <div style="background:#ff6b35; border-radius:2px;"></div>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px; width:94px;">
+                  <span style="font-size:0.6rem; color:var(--teal);">← Low</span>
+                  <span style="font-size:0.6rem; color:var(--fire);">High →</span>
+                </div>
+                <div style="text-align:center; font-size:0.62rem; color:var(--dim); margin-top:2px; letter-spacing:0.4px;">Fire Incident Rate</div>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:6px; border-top:1px solid var(--glass-border); padding-top:10px;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <div style="width:12px; height:12px; border-radius:2px; background:#ff6b35; flex-shrink:0;"></div>
+              <span style="font-size:0.7rem; color:#ccc;">High fire rate + slow response</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <div style="width:12px; height:12px; border-radius:2px; background:#ff9a5c; flex-shrink:0;"></div>
+              <span style="font-size:0.7rem; color:#ccc;">High fire rate + medium response</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <div style="width:12px; height:12px; border-radius:2px; background:#4ecdc4; flex-shrink:0;"></div>
+              <span style="font-size:0.7rem; color:#ccc;">High fire rate + fast response</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <div style="width:12px; height:12px; border-radius:2px; background:#d4f5f3; flex-shrink:0;"></div>
+              <span style="font-size:0.7rem; color:#ccc;">Low fire rate + fast response</span>
+            </div>
+          </div>
+          <div style="font-size:0.65rem; color:var(--muted); line-height:1.5; border-top:1px solid var(--glass-border); padding-top:8px;">
+            Fire rate: total incidents per 250m cell (2014–2025)<br>
+            Response: avg first pump attendance (s) · LFB
+          </div>
+        </div>
+      </div>
+      <p class="ch-context">This map makes the equity dimension of urban resilience visible. The communities facing the highest fire risk are not always the same communities that receive the fastest response. Where the two pressures coincide — orange cells in deprived east London corridors — the system's absorptive capacity is at its most strained.</p>
     </div>
 
+    <div class="ch-section">
+      <h3 class="ch-subtitle">
+        <span style="color:var(--fire); font-family:var(--font-mono);
+               font-size:1.4rem; font-weight:700; margin-right:0.8rem;">2.6</span>
+        The Hidden Cost: False Alarms
+      </h3>
+      <p class="ch-context">Nearly 1 in 2 calls is a false alarm. Three quarters are automatic fire alarm malfunctions — every wasted trip draws resources away from real emergencies.</p>
+      <p class="ch-context">Between 2014 and 2025, AFA malfunctions generated 601,000 false call-outs — equivalent to 450,000 firefighter hours, or 51 years of continuous deployment. The left chart shows the paradox clearly: AFA false alarm volumes have risen even as real fires declined, meaning the gap between wasted and genuine responses has widened. The right chart shows that false alarms have consistently accounted for around 45–50% of all calls throughout the period, with only a modest decline emerging after 2022. The system has not solved this problem — it has adapted around it.</p>
+
+      <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; margin-bottom:2rem;">
+        <div class="kpi-card">
+          <span style="display:block; font-family:var(--font-mono); font-size:1.6rem; font-weight:700; color:var(--fire); margin-bottom:0.3rem;">601k</span>
+          <span style="font-size:0.72rem; color:var(--dim); letter-spacing:1px; text-transform:uppercase;">AFA false alarms (2014–2025)</span>
+        </div>
+        <div class="kpi-card">
+          <span style="display:block; font-family:var(--font-mono); font-size:1.6rem; font-weight:700; color:var(--fire); margin-bottom:0.3rem;">~45 min</span>
+          <span style="font-size:0.72rem; color:var(--dim); letter-spacing:1px; text-transform:uppercase;">avg crew time per call-out</span>
+        </div>
+        <div class="kpi-card">
+          <span style="display:block; font-family:var(--font-mono); font-size:1.6rem; font-weight:700; color:var(--fire); margin-bottom:0.3rem;">450k hrs</span>
+          <span style="font-size:0.72rem; color:var(--dim); letter-spacing:1px; text-transform:uppercase;">firefighter hours lost to AFA</span>
+        </div>
+        <div class="kpi-card">
+          <span style="display:block; font-family:var(--font-mono); font-size:1.6rem; font-weight:700; color:var(--fire); margin-bottom:0.3rem;">51 yrs</span>
+          <span style="font-size:0.72rem; color:var(--dim); letter-spacing:1px; text-transform:uppercase;">equivalent of continuous deployment</span>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:1.5rem; align-items:flex-start; margin-top:1rem;">
+        <div style="flex:1;">
+          <div style="font-size:0.8rem; color:#ccc; font-weight:600; margin-bottom:0.5rem;">AFA False Alarms vs Real Fires (2014–2025)</div>
+          <div class="chart-box" style="height:260px;"><canvas id="chart-afa-trend"></canvas></div>
+        </div>
+        <div style="flex:1;">
+          <div style="font-size:0.8rem; color:#ccc; font-weight:600; margin-bottom:0.5rem;">False Alarm Share of Total Calls</div>
+          <div class="chart-box" style="height:260px;"><canvas id="chart-afa-borough"></canvas></div>
+        </div>
+      </div>
+
+      <div style="margin-top:0.8rem; padding:0.8rem 1rem; background:var(--glass); border:1px solid var(--glass-border); border-radius:8px; font-size:0.85rem; color:var(--dim); text-align:center;">
+        AFA false alarms concentrate in commercial and institutional zones (CBD, hospitals, offices). Dwelling fires concentrate in deprived residential areas. The system spends most of its wasted effort where the least vulnerable people live.
+      </div>
+      <p class="ch-context">Every AFA call-out is a unit of capacity diverted from genuine emergencies. In a city where Special Service demand is surging and outer borough response times are already stretched, this chronic inefficiency is not a background noise — it is a structural vulnerability.</p>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════
+       BRIDGE 3 — file-2版（背景图 + 渐变遮罩 + canvas）
+  ═══════════════════════════════════════════════ -->
+  <div class="bridge" style="position:relative; overflow:hidden;">
+    <div style="position:absolute; inset:0; z-index:0;
+                background-image:url('image/glen-carrie-5MHVf2LWOfY-unsplash.jpg');
+                background-size:cover; background-position:center;
+                filter:brightness(0.4);">
+    </div>
+    <div style="position:absolute; inset:0; z-index:1;
+                background:linear-gradient(180deg, rgba(10,10,15,0.6) 0%, rgba(10,10,15,0.3) 50%, rgba(10,10,15,0.7) 100%);">
+    </div>
+    <canvas class="bridge-canvas" id="bridge-canvas-3" style="position:relative; z-index:2;"></canvas>
+    <p class="bridge-text" style="max-width:700px; text-align:center;">
+      Different emergencies follow
+      <br><strong>completely different seasonal clocks</strong>.
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       CH3 — Scrollytelling: file-2 Signal Panel版
+            季节地图: file-2新增
+  ═══════════════════════════════════════════════ -->
+  <section id="ch3" class="chapter">
+    <div class="chapter-header"><span class="ch-num">03</span><h2>The Rhythms of Emergency</h2></div>
+    <p class="ch-context">A system under strain spatially is also under strain temporally. Monthly data reveals that different incident types peak at the same time — July stacks outdoor fires on top of flooding, while December piles forced entries, flooding, and agency assists together. A flat staffing model has no slack for either month.</p>
+
+    <div class="ch-section">
+      <h3 class="ch-subtitle">
+        <span style="color:var(--fire); font-family:var(--font-mono);
+               font-size:1.4rem; font-weight:700; margin-right:0.8rem;">3.1</span>
+        The Seasonal Landscape
+      </h3>
+        </div>
+
+    <!-- Scrollytelling — file-2版：Signal Panel + 透明占位step -->
     <div class="scrolly" id="scrolly-ch3">
       <div class="scrolly-graphic">
         <canvas id="chart-monthly-focus"></canvas>
       </div>
       <div class="scrolly-steps">
-        <div class="step" data-step="outdoor"><div class="step-card sc-fire"><h3>Outdoor Fire</h3><p>Peaks in July at <strong>9,366</strong> incidents, over <strong>4×</strong> the December low of 2,112. Dry weather and vegetation drive the summer surge.</p></div></div>
-        <div class="step" data-step="dwelling"><div class="step-card sc-fire"><h3>Dwelling Fire</h3><p>Remarkably flat across the year, varying only between 4,800 and 5,500 per month. Residential fires are a constant, year-round risk.</p></div></div>
-        <div class="step" data-step="flooding"><div class="step-card sc-teal"><h3>Flooding</h3><p>Bimodal: a winter peak in December (8,598) and a smaller summer peak in July (8,440). Storm seasons at both ends of the year overlap with the outdoor fire surge.</p></div></div>
-        <div class="step" data-step="entry"><div class="step-card sc-teal"><h3>Forced Entry</h3><p>Highest in December (9,774), with a secondary summer peak (9,721 in July). The amplitude is modest, around 30% between low and high months.</p></div></div>
-        <div class="step" data-step="assist"><div class="step-card sc-yellow"><h3>Agency Assist</h3><p>After a February dip, the trend rises through the year and peaks in December at <strong>2,503</strong>, 41% above the February low. Inter-agency demand concentrates in winter.</p></div></div>
-        <div class="step" data-step="collision"><div class="step-card sc-contrast"><h3>The Temporal Collision</h3><p>July stacks an outdoor fire surge on top of summer flooding while forced entries stay near their annual peak. December delivers the same pile-up: flooding, forced entries, and agency assists all peak together. A flat staffing model has no slack for either month.</p></div></div>
+
+        <div class="signal-panel" id="signal-panel">
+          <div class="signal-title">Five Seasonal Signals</div>
+          <div class="signal-subtitle">Each incident type follows its own seasonal rhythm. Scroll to see them one by one.</div>
+          <div class="signal-list">
+
+            <div class="signal-item" data-step="outdoor">
+              <div class="signal-dot" style="background:#ff6b35; box-shadow:0 0 8px #ff6b35;"></div>
+              <div class="signal-line" style="background:rgba(255,107,53,0.3);"></div>
+              <div class="signal-content">
+                <div class="signal-name" style="color:#ff6b35;">Outdoor Fire</div>
+                <div class="signal-desc">Peaks in July at <strong>9,366</strong> incidents — over <strong>4×</strong> the December low. Dry weather and vegetation drive the summer surge.</div>
+              </div>
+            </div>
+
+            <div class="signal-item" data-step="dwelling">
+              <div class="signal-dot" style="background:#f4a261; box-shadow:0 0 8px #f4a261;"></div>
+              <div class="signal-line" style="background:rgba(244,162,97,0.3);"></div>
+              <div class="signal-content">
+                <div class="signal-name" style="color:#f4a261;">Dwelling Fire</div>
+                <div class="signal-desc">Remarkably flat across the year, varying only between 4,800 and 5,500 per month. Residential fires are a constant, year-round risk.</div>
+              </div>
+            </div>
+
+            <div class="signal-item" data-step="flooding">
+              <div class="signal-dot" style="background:#4ecdc4; box-shadow:0 0 8px #4ecdc4;"></div>
+              <div class="signal-line" style="background:rgba(78,205,196,0.3);"></div>
+              <div class="signal-content">
+                <div class="signal-name" style="color:#4ecdc4;">Flooding</div>
+                <div class="signal-desc">Bimodal: peaks in December (8,598) and again in July (8,440). Storm seasons at both ends of the year overlap with the outdoor fire surge.</div>
+              </div>
+            </div>
+
+            <div class="signal-item" data-step="entry">
+              <div class="signal-dot" style="background:#457b9d; box-shadow:0 0 8px #457b9d;"></div>
+              <div class="signal-line" style="background:rgba(69,123,157,0.3);"></div>
+              <div class="signal-content">
+                <div class="signal-name" style="color:#457b9d;">Forced Entry</div>
+                <div class="signal-desc">Highest in December (9,774), with a secondary summer peak in July (9,721). The brigade is increasingly called to reach isolated individuals.</div>
+              </div>
+            </div>
+
+            <div class="signal-item" data-step="assist">
+              <div class="signal-dot" style="background:#ffe66d; box-shadow:0 0 8px #ffe66d;"></div>
+              <div class="signal-line" style="background:rgba(255,230,109,0.3);"></div>
+              <div class="signal-content">
+                <div class="signal-name" style="color:#ffe66d;">Agency Assist</div>
+                <div class="signal-desc">Rises through the year, peaking in December at <strong>2,503</strong> — 41% above the February low. Inter-agency demand concentrates in winter.</div>
+              </div>
+            </div>
+
+            <div class="signal-item" data-step="collision">
+              <div class="signal-dot" style="background:#ffffff; box-shadow:0 0 8px rgba(255,255,255,0.5);"></div>
+              <div class="signal-line" style="background:rgba(255,255,255,0.1);"></div>
+              <div class="signal-content">
+                <div class="signal-name" style="color:#ffffff;">Temporal Comparison</div>
+                <div class="signal-desc">July and December are the two pressure points where multiple incident types peak simultaneously. A flat staffing model has no slack for either month.</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Scrollama触发占位div -->
+        <div class="step" data-step="overview"  style="height:20vh; opacity:0;"></div>
+        <div class="step" data-step="outdoor"   style="height:60vh; opacity:0;"></div>
+        <div class="step" data-step="dwelling"  style="height:60vh; opacity:0;"></div>
+        <div class="step" data-step="flooding"  style="height:60vh; opacity:0;"></div>
+        <div class="step" data-step="entry"     style="height:60vh; opacity:0;"></div>
+        <div class="step" data-step="assist"    style="height:60vh; opacity:0;"></div>
+        <div class="step" data-step="collision" style="height:60vh; opacity:0;"></div>
+      </div>
+    </div>
+
+    <!-- 3.2 季节地图 — file-2新增 -->
+    <div class="ch-section">
+      <h3 class="ch-subtitle">
+        <span style="color:var(--fire); font-family:var(--font-mono);
+               font-size:1.4rem; font-weight:700; margin-right:0.8rem;">3.2</span>
+        Where Do Seasonal Peaks Concentrate?
+      </h3>
+      <p class="ch-context">Summer brings outdoor fires to green-space boroughs in south and outer London. Winter stacks flooding and forced entries in inner-city and riverside boroughs. Toggle between seasons to see the shift.</p>
+    </div>
+
+    <!-- 季节地图容器 -->
+    <div style="position:relative; height:620px; border-radius:12px; overflow:hidden; border:1px solid var(--glass-border);">
+      <div id="map-seasonal" style="width:100%; height:100%;"></div>
+
+      <!-- 左侧季节 + 类型选择器 -->
+      <div style="position:absolute; left:12px; top:50%; transform:translateY(-50%); z-index:10; display:flex; align-items:center; gap:8px;">
+
+        <div style="display:flex; flex-direction:column; gap:10px; align-items:center;">
+          <div id="btn-summer" style="
+            width:55px; height:55px; border-radius:50%; cursor:pointer;
+            border:2px solid #ff6b35; overflow:hidden; position:relative;
+            box-shadow:0 0 14px rgba(255,107,53,0.7);
+            transition:all 0.25s cubic-bezier(0.34,1.56,0.64,1);
+            transform:scale(1.1) translateY(-2px);">
+            <div style="position:absolute;inset:0;background-image:url('https://images.unsplash.com/photo-1504370805625-d32c54b16100?w=200&q=80');background-size:cover;background-position:center;filter:brightness(0.7) saturate(1.2);"></div>
+            <div style="position:absolute;inset:0;background:rgba(255,107,53,0.35);"></div>
+            <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font-size:1.1rem;line-height:1;">
+              ☀<span style="font-size:0.5rem;margin-top:2px;font-weight:700;letter-spacing:0.5px;">SUMMER</span>
+            </div>
+          </div>
+
+          <div id="btn-winter" style="
+            width:49px; height:55px; border-radius:50%; cursor:pointer;
+            border:2px solid rgba(78,205,196,0.4); overflow:hidden; position:relative;
+            box-shadow:none; opacity:0.65;
+            transition:all 0.25s cubic-bezier(0.34,1.56,0.64,1);
+            transform:scale(1);">
+            <div style="position:absolute;inset:0;background-image:url('https://images.unsplash.com/photo-1548777123-e216912df7d8?w=200&q=80');background-size:cover;background-position:center;filter:brightness(0.5) saturate(0.8) hue-rotate(180deg);"></div>
+            <div style="position:absolute;inset:0;background:rgba(78,205,196,0.25);"></div>
+            <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font-size:1rem;line-height:1;">
+              ❄<span style="font-size:0.5rem;margin-top:2px;font-weight:700;letter-spacing:0.5px;">WINTER</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 类型选择扇形小圆 -->
+        <div id="type-fan" style="position:relative; width:110px; height:210px;">
+          <div id="btn-fire" style="position:absolute; left:10px; top:0px; width:45px; height:45px; border-radius:50%; cursor:pointer; background:rgba(255,107,53,0.85); border:2px solid #ff6b35; display:flex;flex-direction:column;align-items:center;justify-content:center; color:#fff; font-size:0.9rem; line-height:1; box-shadow:0 0 10px rgba(255,107,53,0.5); transition:all 0.25s cubic-bezier(0.34,1.56,0.64,1);">
+            <span style="font-size:0.38rem;font-weight:700;margin-top:1px;">OUTDOOR</span>
+          </div>
+          <div id="btn-dwelling" style="position:absolute; left:50px; top:36px; width:40px; height:40px; border-radius:50%; cursor:pointer; background:rgba(0,0,0,0.5); border:1.5px solid rgba(244,162,97,0.4); display:flex;flex-direction:column;align-items:center;justify-content:center; color:#aaa; font-size:0.85rem; line-height:1; transition:all 0.25s cubic-bezier(0.34,1.56,0.64,1);">
+            <span style="font-size:0.38rem;font-weight:600;margin-top:1px;">DWELLING</span>
+          </div>
+          <div id="btn-flood" style="position:absolute; left:55px; top:82px; width:40px; height:40px; border-radius:50%; cursor:pointer; background:rgba(0,0,0,0.5); border:1.5px solid rgba(78,205,196,0.4); display:flex;flex-direction:column;align-items:center;justify-content:center; color:#aaa; font-size:0.85rem; line-height:1; transition:all 0.25s cubic-bezier(0.34,1.56,0.64,1);">
+            <span style="font-size:0.38rem;font-weight:600;margin-top:1px;">FLOOD</span>
+          </div>
+          <div id="btn-entry" style="position:absolute; left:40px; top:128px; width:40px; height:40px; border-radius:50%; cursor:pointer; background:rgba(0,0,0,0.5); border:1.5px solid rgba(69,123,157,0.4); display:flex;flex-direction:column;align-items:center;justify-content:center; color:#aaa; font-size:0.85rem; line-height:1; transition:all 0.25s cubic-bezier(0.34,1.56,0.64,1);">
+            <span style="font-size:0.38rem;font-weight:600;margin-top:1px;">ENTRY</span>
+          </div>
+          <div id="btn-assist" style="position:absolute; left:10px; top:166px; width:40px; height:40px; border-radius:50%; cursor:pointer; background:rgba(0,0,0,0.5); border:1.5px solid rgba(255,230,109,0.4); display:flex;flex-direction:column;align-items:center;justify-content:center; color:#aaa; font-size:0.85rem; line-height:1; transition:all 0.25s cubic-bezier(0.34,1.56,0.64,1);">
+            <span style="font-size:0.38rem;font-weight:600;margin-top:1px;">ASSIST</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 右侧图例 + hover面板 -->
+      <div style="position:absolute; top:12px; right:12px; z-index:10;
+                  background:rgba(10,10,15,0.85); backdrop-filter:blur(8px);
+                  border:1px solid rgba(255,255,255,0.1); border-radius:10px;
+                  padding:12px 14px; width:190px;
+                  display:flex; flex-direction:column; gap:0;">
+
+        <div id="seasonal-legend-title" style="font-size:0.78rem; font-weight:600; color:#ff6b35; margin-bottom:8px;">Outdoor Fire</div>
+
+        <div style="display:flex; flex-direction:column; gap:5px;">
+          <div style="display:flex; align-items:center; gap:7px;">
+            <div id="legend-c1" style="width:12px; height:12px; border-radius:2px; flex-shrink:0;"></div>
+            <span id="legend-label1" style="font-size:0.68rem; color:#aaa; font-family:var(--font-mono);">—</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:7px;">
+            <div id="legend-c2" style="width:12px; height:12px; border-radius:2px; flex-shrink:0;"></div>
+            <span id="legend-label2" style="font-size:0.68rem; color:#aaa; font-family:var(--font-mono);">—</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:7px;">
+            <div id="legend-c3" style="width:12px; height:12px; border-radius:2px; flex-shrink:0;"></div>
+            <span id="legend-label3" style="font-size:0.68rem; color:#aaa; font-family:var(--font-mono);">—</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:7px;">
+            <div id="legend-c4" style="width:12px; height:12px; border-radius:2px; flex-shrink:0;"></div>
+            <span id="legend-label4" style="font-size:0.68rem; color:#aaa; font-family:var(--font-mono);">—</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:7px;">
+            <div id="legend-c5" style="width:12px; height:12px; border-radius:2px; flex-shrink:0;"></div>
+            <span id="legend-label5" style="font-size:0.68rem; color:#aaa; font-family:var(--font-mono);">—</span>
+          </div>
+        </div>
+
+        <div style="border-top:1px solid rgba(255,255,255,0.06); margin:8px 0 6px; font-size:0.62rem; color:#444; line-height:1.6;">
+          Summer = May–Sep · Winter = Nov–Mar
+        </div>
+
+        <div style="border-top:1px solid rgba(255,255,255,0.06); padding-top:8px;">
+          <div id="hover-ward" style="font-size:0.75rem; font-weight:600; color:#fff; margin-bottom:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">—</div>
+          <div id="hover-count" style="font-size:0.72rem; color:#aaa; margin-bottom:2px;">—</div>
+          <div id="hover-rank"  style="font-size:0.72rem; color:#aaa; margin-bottom:2px;">—</div>
+          <div id="hover-avg"   style="font-size:0.72rem; color:#aaa;">—</div>
+        </div>
+      </div>
+    </div><!-- 季节地图容器结束 -->
+
+    <!-- 季节分析卡片 -->
+    <div class="ch-section">
+      <div style="display:grid; grid-template-columns:repeat(5,1fr); gap:1rem; margin-top:1rem;">
+
+        <div style="display:flex; flex-direction:column; align-items:center; gap:0;">
+          <div style="width:100%; background:rgba(255,107,53,0.06); border:1px solid rgba(255,107,53,0.2); border-radius:0 0 10px 10px; padding:0.8rem; margin-top:-2px;">
+            <div style="font-size:0.68rem; font-weight:700; color:#ff6b35; letter-spacing:0.05em; margin-bottom:0.4rem;">OUTDOOR FIRE</div>
+            <p style="font-size:0.72rem; color:#999; line-height:1.5; margin:0 0 0.6rem;">Summer peaks in outer south and west London — Bromley, Croydon, Hillingdon — where green space is most abundant.</p>
+            <div style="border-top:1px solid rgba(255,107,53,0.15); padding-top:0.5rem; font-size:0.66rem; color:#ff6b35; line-height:1.4;">
+              <strong>Resilience:</strong> <span style="color:#777;">Outer boroughs lack station density to absorb seasonal surges — an <em style="color:#ff6b35;">Adapt</em> failure.</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex; flex-direction:column; align-items:center; gap:0;">
+          <div style="width:100%; background:rgba(244,162,97,0.06); border:1px solid rgba(244,162,97,0.2); border-radius:0 0 10px 10px; padding:0.8rem; margin-top:-2px;">
+            <div style="font-size:0.68rem; font-weight:700; color:#f4a261; letter-spacing:0.05em; margin-bottom:0.4rem;">DWELLING FIRE</div>
+            <p style="font-size:0.72rem; color:#999; line-height:1.5; margin:0 0 0.6rem;">Flat year-round across all wards, with higher rates in deprived inner-city areas regardless of season.</p>
+            <div style="border-top:1px solid rgba(244,162,97,0.15); padding-top:0.5rem; font-size:0.66rem; color:#f4a261; line-height:1.4;">
+              <strong>Resilience:</strong> <span style="color:#777;">A constant baseline load the system must <em style="color:#f4a261;">Absorb</em> regardless of seasonal pressure.</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex; flex-direction:column; align-items:center; gap:0;">
+          <div style="width:100%; background:rgba(78,205,196,0.06); border:1px solid rgba(78,205,196,0.2); border-radius:0 0 10px 10px; padding:0.8rem; margin-top:-2px;">
+            <div style="font-size:0.68rem; font-weight:700; color:#4ecdc4; letter-spacing:0.05em; margin-bottom:0.4rem;">FLOODING</div>
+            <p style="font-size:0.72rem; color:#999; line-height:1.5; margin:0 0 0.6rem;">Concentrates along Thames corridor — Woolwich, Barking, Tower Hamlets — reflecting proximity to water and ageing drainage.</p>
+            <div style="border-top:1px solid rgba(78,205,196,0.15); padding-top:0.5rem; font-size:0.66rem; color:#4ecdc4; line-height:1.4;">
+              <strong>Resilience:</strong> <span style="color:#777;">Bimodal peaks in July and December exceed system slack — an <em style="color:#4ecdc4;">Absorb</em> limit.</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex; flex-direction:column; align-items:center; gap:0;">
+          <div style="width:100%; background:rgba(69,123,157,0.06); border:1px solid rgba(69,123,157,0.2); border-radius:0 0 10px 10px; padding:0.8rem; margin-top:-2px;">
+            <div style="font-size:0.68rem; font-weight:700; color:#457b9d; letter-spacing:0.05em; margin-bottom:0.4rem;">FORCED ENTRY</div>
+            <p style="font-size:0.72rem; color:#999; line-height:1.5; margin:0 0 0.6rem;">Clusters in deprived inner-city wards — Newham, Hackney, Tower Hamlets — reflecting social isolation regardless of season.</p>
+            <div style="border-top:1px solid rgba(69,123,157,0.15); padding-top:0.5rem; font-size:0.66rem; color:#457b9d; line-height:1.4;">
+              <strong>Resilience:</strong> <span style="color:#777;">Without social care reform, the brigade cannot <em style="color:#457b9d;">Transform</em> — it can only absorb.</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex; flex-direction:column; align-items:center; gap:0;">
+          <div style="width:100%; background:rgba(255,230,109,0.06); border:1px solid rgba(255,230,109,0.2); border-radius:0 0 10px 10px; padding:0.8rem; margin-top:-2px;">
+            <div style="font-size:0.68rem; font-weight:700; color:#ffe66d; letter-spacing:0.05em; margin-bottom:0.4rem;">AGENCY ASSIST</div>
+            <p style="font-size:0.72rem; color:#999; line-height:1.5; margin:0 0 0.6rem;">Concentrated in inner London where NHS and police pressure is highest. Winter peaks signal system-wide strain across public services.</p>
+            <div style="border-top:1px solid rgba(255,230,109,0.15); padding-top:0.5rem; font-size:0.66rem; color:#ffe66d; line-height:1.4;">
+              <strong>Resilience:</strong> <span style="color:#777;">A +433% rise signals the brigade backstopping a failing <em style="color:#ffe66d;">Transform</em> agenda across public services.</span>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   </section>
 
+  <!-- ═══════════════════════════════════════════════
+       CONCLUSION — file-2版（完整版：Findings + Resilience Framework）
+  ═══════════════════════════════════════════════ -->
   <section id="conclusion" class="chapter ch5-section">
     <div class="ch5-body">
+
       <h2 class="conclusion-title">Reading the City</h2>
-      <p class="conclusion-lead">London Fire Brigade answers over <strong>100,000</strong> calls a year. Fewer than 1 in 7 are actual fires.</p>
-      <p class="conclusion-text">The rest, floods, forced entries, agency assists, are signals of a city ageing, warming, and stretching its safety nets. Since the 2014 station closures, new demand has shifted outward to where response is slowest, and seasonal peaks in July and December stack incident types on top of one another.</p>
-      <p class="conclusion-text">Urban Analytics lets us read these signals and ask: <em>is the system resilient enough for the city London is becoming?</em></p>
+      <p class="conclusion-lead">London Fire Brigade answers over <strong>100,000</strong> calls a year. Fewer than 1 in 7 are actual fires. Here is what 1.34 million calls reveal.</p>
+
+      <div class="kpi-row" id="kpi-ch5" style="margin:2rem 0; grid-template-columns:repeat(5,1fr);">
+        <div class="kpi-card">
+          <span class="kpi-val" data-to="1340000" data-suf="">0</span>
+          <span class="kpi-lbl">Total calls 2014–2025</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-val" data-to="14" data-suf="%">0</span>
+          <span class="kpi-lbl">Calls that were actual fires (2025)</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-val" data-to="41" data-suf="%">0</span>
+          <span class="kpi-lbl">Calls now Special Service</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-val" data-to="64" data-suf="%">0</span>
+          <span class="kpi-lbl">Higher fire rate in most deprived wards</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-val" data-to="104" data-suf="%">0</span>
+          <span class="kpi-lbl">Special Service growth in outer London</span>
+        </div>
+      </div>
+
+      <h3 style="color:#fff; font-size:1.1rem; margin:2.5rem 0 1.2rem; font-weight:600;">Three Findings</h3>
+      <div class="findings-row">
+
+        <div class="finding-card" style="border-color:rgba(255,107,53,0.3); background:rgba(255,107,53,0.04);">
+          <div class="finding-icon" style="color:#ff6b35;">⬡</div>
+          <div class="finding-label" style="color:#ff6b35;">Structural Shift</div>
+          <div class="finding-stats">
+            <div class="finding-stat">Fire <span style="color:#ff6b35;">22% → 14%</span></div>
+            <div class="finding-stat">Special Service <span style="color:#ff6b35;">30% → 41%</span></div>
+            <div class="finding-stat">False Alarm absorbs <span style="color:#ff6b35;">45%</span> of all calls</div>
+          </div>
+          <p class="finding-desc">The brigade's identity has shifted. Forced entries, flood response, and agency assists now define its workload more than firefighting does.</p>
+        </div>
+
+        <div class="finding-card" style="border-color:rgba(78,205,196,0.3); background:rgba(78,205,196,0.04);">
+          <div class="finding-icon" style="color:#4ecdc4;">◎</div>
+          <div class="finding-label" style="color:#4ecdc4;">Spatial Mismatch</div>
+          <div class="finding-stats">
+            <div class="finding-stat">Outer London SS growth <span style="color:#4ecdc4;">+104%</span></div>
+            <div class="finding-stat">Inner London SS growth <span style="color:#4ecdc4;">+89%</span></div>
+            <div class="finding-stat">Slowest response in fastest-growing boroughs</div>
+          </div>
+          <p class="finding-desc">New demand has migrated outward — to exactly the parts of London where stations are fewest and response times longest.</p>
+        </div>
+
+        <div class="finding-card" style="border-color:rgba(255,230,109,0.3); background:rgba(255,230,109,0.04);">
+          <div class="finding-icon" style="color:#ffe66d;">◷</div>
+          <div class="finding-label" style="color:#ffe66d;">Temporal Comparison</div>
+          <div class="finding-stats">
+            <div class="finding-stat">July: outdoor fire <span style="color:#ffe66d;">+ flooding</span></div>
+            <div class="finding-stat">December: flooding <span style="color:#ffe66d;">+ entry + assist</span></div>
+            <div class="finding-stat">Both months exceed system slack</div>
+          </div>
+          <p class="finding-desc">Seasonal peaks do not distribute evenly. July and December stack multiple incident types simultaneously — a flat staffing model cannot absorb either.</p>
+        </div>
+
+      </div>
+
+      <h3 style="color:#fff; font-size:1.1rem; margin:2.5rem 0 1rem; font-weight:600;">Urban Resilience Framework</h3>
+      <p class="conclusion-text" style="margin-bottom:1.5rem;">Drawing on Meerow et al. (2016), urban resilience asks whether a system can absorb, adapt to, and transform under stress. London's emergency data suggests the answer is mixed.</p>
+
+      <div class="resilience-grid">
+        <div class="res-cell res-header-col"><div class="res-label">Dimension</div></div>
+        <div class="res-cell res-header-col"><div class="res-label">Evidence</div></div>
+        <div class="res-cell res-header-col"><div class="res-label">Assessment</div></div>
+
+        <div class="res-cell">
+          <div class="res-dim" style="color:#ff6b35;">Absorb</div>
+          <div class="res-subdim">Can the system handle current demand?</div>
+        </div>
+        <div class="res-cell">
+          <div class="res-evidence">45% of calls are false alarms. Real demand is growing in outer London where capacity is lowest.</div>
+        </div>
+        <div class="res-cell"><div class="res-tag res-amber">⚠ Partial</div></div>
+
+        <div class="res-cell">
+          <div class="res-dim" style="color:#4ecdc4;">Adapt</div>
+          <div class="res-subdim">Is capacity shifting with demand?</div>
+        </div>
+        <div class="res-cell">
+          <div class="res-evidence">Station coverage in outer London unchanged since 2014 closures. Response times diverging between inner and outer.</div>
+        </div>
+        <div class="res-cell"><div class="res-tag res-red">✕ Weak</div></div>
+
+        <div class="res-cell">
+          <div class="res-dim" style="color:#ffe66d;">Transform</div>
+          <div class="res-subdim">Is the system redesigning itself?</div>
+        </div>
+        <div class="res-cell">
+          <div class="res-evidence">Brigade role has expanded to fill gaps left by NHS, police, and local councils — but without structural resourcing for the new role.</div>
+        </div>
+        <div class="res-cell"><div class="res-tag res-red">✕ Reactive</div></div>
+      </div>
+
+      <p class="conclusion-text" style="margin-top:1.8rem;">London's fire service has quietly become something else — a flexible backstop for a city whose other systems are under strain. The data does not suggest failure. It suggests a system being stretched in ways that were not planned for, and that the geography of that stretch is uneven in ways that matter.</p>
 
       <div class="methodology">
         <h4>Methodology</h4>
         <p>Analysis of roughly 1.34 million LFB incident records (2014 to 2025) from the <a href="https://data.london.gov.uk/" target="_blank">London Datastore</a> (OGL v2). Spatial analysis uses 250m grid aggregation with pyproj BNG-to-WGS84 coordinate transformation. The deprivation and fire correlation is computed on the 2018 to 2023 subset because ward boundaries were redrawn in 2014, and the 2018 to 2023 file uses the post-revision ONS ward codes that match IMD 2019. Correlations use Pearson's r on ward-level fire rates per 1,000 population, joined to IMD 2019 (MHCLG) via ward code with name-based fallback. Ward-level IMD scores should be read as 2019 estimates rather than current values.</p>
+        <p>Libraries used: Mapbox GL JS v3.17, D3.js v7, Chart.js v4.4, Scrollama v3.2, GSAP v3.12, Three.js r128.</p>
         <h4>AI tools used</h4>
         <p>Claude (Anthropic) and ChatGPT (OpenAI) were used to scaffold the scrollytelling structure, draft initial Chart.js / D3 / Mapbox boilerplate, and review code for bugs. The data preparation scripts (<code>prepare_data.py</code>, <code>prepare_grids_v3.py</code>, <code>imd_analysis.py</code>) were drafted with AI assistance and reviewed by the team. All analytical claims in the text (Pearson r, quartile gaps, growth rates, monthly peaks, borough totals) were computed directly from LFB data and cross-checked against the source files.</p>
+        <p style="margin-top:0.8rem; font-size:0.8rem; color:#555;">Meerow, S., Newell, J.P. and Stults, M. (2016). Defining urban resilience: A review. <em>Landscape and Urban Planning</em>, 147, pp.38–49.</p>
       </div>
+
       <div class="credits"><p>CASA0029 Urban Data Visualisation · UCL 2025/26</p></div>
     </div>
   </section>
@@ -236,6 +967,8 @@
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
   <script src="https://unpkg.com/scrollama@3.2.0/build/scrollama.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>
